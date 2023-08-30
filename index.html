@@ -125,7 +125,7 @@
       const randomMyPart = myParts[Math.floor(Math.random() * myParts.length)];
       const randomPunctuation = punctuations[Math.floor(Math.random() * punctuations.length)];
 
-      const sentence = `${randomSetupVerb} ${randomAdverb} ${randomVerb} your ${randomAdjective1} ${randomPartnerPart} with my ${randomAdjective2} ${randomMyPart} ${randomPunctuation}`;
+      const sentence = `I ${randomSetupVerb} ${randomAdverb} ${randomVerb} your ${randomAdjective1} ${randomPartnerPart} with my ${randomAdjective2} ${randomMyPart} ${randomPunctuation}`;
 
       const outputElement = document.getElementById(`output${index}`);
       outputElement.textContent = sentence;
