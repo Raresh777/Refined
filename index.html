@@ -11,17 +11,13 @@
       color: #333;
       margin: 0;
       padding: 0;
-      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
     }
-
     .button-container {
       margin-bottom: 20px;
     }
-
     button {
       font-size: 18px;
       padding: 12px 24px;
@@ -32,18 +28,15 @@
       cursor: pointer;
       margin-bottom: 10px;
     }
-
     button.copy-button {
       font-size: 12px;
       padding: 6px 12px;
       background: #64B5F6;
       color: white;
     }
-
     button:hover {
       background: linear-gradient(to right, #64B5F6, #2196F3);
     }
-
     .output-container {
       display: flex;
       flex-wrap: wrap;
@@ -51,7 +44,6 @@
       justify-content: center;
       margin: 10px 0;
     }
-
     .output-box {
       display: flex;
       flex-direction: column;
@@ -64,20 +56,16 @@
       height: 300px;
       overflow-y: auto;
     }
-
     .output-box div {
       margin-top: 10px;
       word-wrap: break-word;
     }
-
   </style>
 </head>
 <body>
-
   <div class="button-container">
     <button id="generateButton">Bundle</button>
   </div>
-
   <div class="output-container">
     <div class="output-box">
       <button class="copy-button" onclick="copyToClipboard('output1')">Copy Text</button>
@@ -92,11 +80,9 @@
       <div id="output3"></div>
     </div>
   </div>
-
   <div class="button-container">
     <button id="supportButton">Support Message</button>
   </div>
-
   <div class="output-container">
     <div class="output-box">
       <button class="copy-button" onclick="copyToClipboard('supportOutput1')">Copy Text</button>
@@ -111,37 +97,32 @@
       <div id="supportOutput3"></div>
     </div>
   </div>
-
   <script>
     document.getElementById("generateButton").addEventListener("click", generateRandomBundles);
     document.getElementById("supportButton").addEventListener("click", generateSupportMessages);
-
     async function generateRandomBundles() {
       for (let i = 1; i <= 3; i++) {
         await generateRandomBundle(i);
       }
     }
-
     async function generateRandomBundle(index) {
       try {
         const response = await fetch('https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
         const text = await response.text();
         const sentences = text.trim().split('^');
-        let randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
-        randomSentence = randomSentence.replace(/^\d+\.\s*/, "");
+        const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+        const cleanSentence = randomSentence.replace(/^\d+\.\s*/, "");
         const outputElement = document.getElementById(`output${index}`);
-        outputElement.textContent = randomSentence;
+        outputElement.textContent = cleanSentence;
       } catch (error) {
         console.error('Error loading sentences:', error);
       }
     }
-
-    function generateSupportMessages() {
+    async function generateSupportMessages() {
       for (let i = 1; i <= 3; i++) {
-        generateSupportMessage(i);
+        await generateSupportMessage(i);
       }
     }
-
     function generateSupportMessage(index) {
       const supportMessages = [
         "Your support means the world to us!",
@@ -154,12 +135,10 @@
       const outputElement = document.getElementById(`supportOutput${index}`);
       outputElement.textContent = randomSupportMessage;
     }
-
     function copyToClipboard(elementId) {
       const text = document.getElementById(elementId).textContent;
       navigator.clipboard.writeText(text);
     }
-
   </script>
 </body>
 </html>
