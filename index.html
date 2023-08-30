@@ -74,6 +74,15 @@
       width: 300px;
       height: 100px;
     }
+
+    .copy-confirmation {
+      position: absolute;
+      background-color: golden;
+      color: black;
+      padding: 5px;
+      border-radius: 5px;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
@@ -109,32 +118,40 @@
     }
 
     async function generateRandomBundle(index) {
-      const outputElement = document.createElement('div');
-      outputElement.className = "output-box";
+      const outputElement = createOutputElement('output-box', 'output', index);
+      await populateBundleData(outputElement, index);
+      document.getElementById('bundleBoxes').appendChild(outputElement);
+    }
 
+    function createOutputElement(className, idPrefix, index) {
+      const outputElement = document.createElement('div');
+      outputElement.className = className;
+      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard(event, '${idPrefix}${index}')">Copy Text</button><div id="${idPrefix}${index}"></div>`;
+      return outputElement;
+    }
+
+    async function populateBundleData(outputElement, index) {
       try {
         const response = await fetch('https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
         const text = await response.text();
         const sentences = text.trim().split('^');
-
         const randomSentence = sentences[Math.floor(Math.random() * sentences.length)].replace(/^\d+\./, '');
-
-        outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('output${index}')">Copy Text</button><div id="output${index}">${randomSentence}</div>`;
+        outputElement.querySelector(`#output${index}`).textContent = randomSentence;
       } catch (error) {
         console.error('Error loading sentences:', error);
       }
-
-      document.getElementById('bundleBoxes').appendChild(outputElement);
     }
 
     function generateSupportMessages() {
       clearPreviousBoxes('supportBoxes');
       for (let i = 1; i <= 3; i++) {
-        generateSupportMessage(i);
+        const outputElement = createOutputElement('support-output-box', 'supportOutput', i);
+        populateSupportMessage(outputElement, i);
+        document.getElementById('supportBoxes').appendChild(outputElement);
       }
     }
 
-    function generateSupportMessage(index) {
+    function populateSupportMessage(outputElement, index) {
       const supportMessages = [
         "Your support means the world to us!",
         "Thank you for being an amazing supporter!",
@@ -142,29 +159,22 @@
         "We appreciate your dedication and support!",
         "With your support, we can keep creating awesome content!"
       ];
-
       const randomSupportMessage = supportMessages[Math.floor(Math.random() * supportMessages.length)];
-
-      const outputElement = document.createElement('div');
-      outputElement.className = "support-output-box";
-      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('supportOutput${index}')">Copy Text</button><div id="supportOutput${index}">${randomSupportMessage}</div>`;
-
-      document.getElementById('supportBoxes').appendChild(outputElement);
+      outputElement.querySelector(`#supportOutput${index}`).textContent = randomSupportMessage;
     }
 
-    function copyToClipboard(elementId) {
+    function copyToClipboard(event, elementId) {
       const textToCopy = document.getElementById(elementId).textContent;
       navigator.clipboard.writeText(textToCopy);
+      showCopiedConfirmation(event.clientX, event.clientY);
+    }
 
+    function showCopiedConfirmation(x, y) {
       const confirmation = document.createElement('div');
       confirmation.textContent = "Copied 🫡";
-      confirmation.style.position = "fixed";
-      confirmation.style.bottom = "20px";
-      confirmation.style.right = "20px";
-      confirmation.style.backgroundColor = "golden";
-      confirmation.style.color = "black";
-      confirmation.style.padding = "5px";
-      confirmation.style.borderRadius = "5px";
+      confirmation.className = "copy-confirmation";
+      confirmation.style.left = `${x}px`;
+      confirmation.style.top = `${y}px`;
 
       document.body.appendChild(confirmation);
 
