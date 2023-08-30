@@ -120,7 +120,7 @@
       try {
         const response = await fetch('https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
         const text = await response.text();
-        const sentences = text.trim().split('\n');
+        const sentences = text.trim().split('^');
 
         const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
 
