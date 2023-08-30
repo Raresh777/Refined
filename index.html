@@ -38,7 +38,6 @@
     .button-container button:hover {
       background: golden;
       color: black;
-      box-shadow: 0px 0px 15px golden;
     }
 
     .button-container button:active {
@@ -100,12 +99,16 @@
   <div class="button-container">
     <button id="generateButton">Generate Bundle</button>
   </div>
-  <div class="output-container" id="bundleBoxes"></div>
+  <div class="output-container" id="bundleBoxes">
+    <!-- This will start empty -->
+  </div>
 
   <div class="button-container">
     <button id="supportButton">Generate Support Message</button>
   </div>
-  <div class="output-container" id="supportBoxes"></div>
+  <div class="output-container" id="supportBoxes">
+    <!-- This will start empty -->
+  </div>
 
   <script>
     document.getElementById("generateButton").addEventListener("click", generateRandomBundles);
@@ -121,7 +124,7 @@
     function generateRandomBundle(index) {
       const outputElement = document.createElement('div');
       outputElement.className = "output-box";
-      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('output${index}', event)">Copy Text</button><div id="output${index}"></div>`;
+      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('output${index}', event)">Copy Text</button><div id="output${index}">This is a sample text for bundle ${index}.</div>`;
       document.getElementById('bundleBoxes').appendChild(outputElement);
     }
 
@@ -135,7 +138,7 @@
     function generateSupportMessage(index) {
       const outputElement = document.createElement('div');
       outputElement.className = "support-output-box";
-      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('supportOutput${index}', event)">Copy Text</button><div id="supportOutput${index}"></div>`;
+      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('supportOutput${index}', event)">Copy Text</button><div id="supportOutput${index}">This is a sample support message ${index}.</div>`;
       document.getElementById('supportBoxes').appendChild(outputElement);
     }
 
