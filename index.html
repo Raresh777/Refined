@@ -32,90 +32,43 @@
       border-radius: 20px;
       color: golden;
       cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .button-container button:hover {
-      background: golden;
-      color: black;
-    }
-
-    .button-container button:active {
-      transform: scale(0.95);
     }
 
     .output-container {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
       gap: 10px;
-      justify-content: center;
       margin: 20px;
-    }
-
-    .output-box,
-    .support-output-box {
-      background-color: rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
-      padding: 10px;
-      overflow-y: auto;
     }
 
     .output-box {
       width: 300px;
       height: 250px;
-    }
-
-    .support-output-box {
-      width: 300px;
-      height: 100px;
-    }
-
-    .copy-button {
-      font-size: 12px;
-      background-color: golden;
-      color: black;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-
-    /* Style scrollbar */
-    ::-webkit-scrollbar {
-      width: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: golden;
-      border-radius: 5px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: black;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 10px;
+      overflow-y: scroll;
     }
   </style>
 </head>
 <body>
   <div class="button-container">
-    <button id="generateButton">Generate Bundle</button>
+    <button id="generateButton">Bundle</button>
   </div>
   <div class="output-container" id="bundleBoxes">
-    <!-- This will start empty -->
-  </div>
-
-  <div class="button-container">
-    <button id="supportButton">Generate Support Message</button>
-  </div>
-  <div class="output-container" id="supportBoxes">
-    <!-- This will start empty -->
+    <!-- Dynamic Content will be here -->
   </div>
 
   <script>
-    document.getElementById("generateButton").addEventListener("click", generateRandomBundles);
-    document.getElementById("supportButton").addEventListener("click", generateSupportMessages);
+    document.getElementById("generateButton").addEventListener("click", function() {
+      generateRandomBundles();
+    });
 
     function generateRandomBundles() {
+      // Clear the existing boxes
       document.getElementById('bundleBoxes').innerHTML = '';
+
       for (let i = 1; i <= 3; i++) {
         generateRandomBundle(i);
       }
@@ -124,43 +77,8 @@
     function generateRandomBundle(index) {
       const outputElement = document.createElement('div');
       outputElement.className = "output-box";
-      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('output${index}', event)">Copy Text</button><div id="output${index}">This is a sample text for bundle ${index}.</div>`;
+      outputElement.innerHTML = `<p>This is bundle ${index}</p>`;
       document.getElementById('bundleBoxes').appendChild(outputElement);
-    }
-
-    function generateSupportMessages() {
-      document.getElementById('supportBoxes').innerHTML = '';
-      for (let i = 1; i <= 3; i++) {
-        generateSupportMessage(i);
-      }
-    }
-
-    function generateSupportMessage(index) {
-      const outputElement = document.createElement('div');
-      outputElement.className = "support-output-box";
-      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('supportOutput${index}', event)">Copy Text</button><div id="supportOutput${index}">This is a sample support message ${index}.</div>`;
-      document.getElementById('supportBoxes').appendChild(outputElement);
-    }
-
-    function copyToClipboard(elementId, event) {
-      const textToCopy = document.getElementById(elementId).textContent;
-      navigator.clipboard.writeText(textToCopy);
-
-      const confirmation = document.createElement('div');
-      confirmation.textContent = "Copied 🫡";
-      confirmation.style.position = "absolute";
-      confirmation.style.left = `${event.clientX}px`;
-      confirmation.style.top = `${event.clientY}px`;
-      confirmation.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
-      confirmation.style.color = "black";
-      confirmation.style.padding = "5px";
-      confirmation.style.borderRadius = "15px";
-      
-      document.body.appendChild(confirmation);
-
-      setTimeout(() => {
-        document.body.removeChild(confirmation);
-      }, 2000);
     }
   </script>
 </body>
