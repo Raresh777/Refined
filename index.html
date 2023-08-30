@@ -16,6 +16,7 @@
       overflow: auto;
       color: gold;
     }
+
     .button-container {
       display: flex;
       flex-direction: column;
@@ -23,6 +24,7 @@
       gap: 10px;
       margin: 20px;
     }
+
     .button-container button {
       font-size: 18px;
       padding: 10px 20px;
@@ -33,34 +35,42 @@
       cursor: pointer;
       transition: transform 0.1s ease;
     }
+
     .button-container button:active {
       transform: scale(0.95);
     }
+
     .output-container {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 10px;
-      justify-content: center;
+      align-items: center;
       margin: 20px;
     }
+
     .output-box, .support-output-box {
       border: 2px solid goldenrod;
       border-radius: 10px;
       padding: 10px;
       background-color: rgba(255, 223, 0, 0.1);
-      overflow-y: scroll;
       width: 300px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .output-box {
+      overflow-y: scroll;
       height: 250px;
     }
+
     .support-output-box {
       height: 100px;
     }
+
+    .output-box::-webkit-scrollbar, .support-output-box::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .output-box::-webkit-scrollbar-thumb, .support-output-box::-webkit-scrollbar-thumb {
+      background: goldenrod;
+      border-radius: 5px;
+    }
+
     .copy-button {
       margin-top: 10px;
       background: transparent;
@@ -70,9 +80,11 @@
       padding: 5px;
       cursor: pointer;
     }
+
     .copy-button:hover {
       background-color: rgba(255, 215, 0, 0.2);
     }
+
     .copy-confirmation {
       position: absolute;
       background-color: rgba(255, 223, 0, 0.7);
@@ -91,13 +103,14 @@
   <div class="output-container" id="bundleBoxes">
     <!-- Dynamic Content will be here -->
   </div>
+
   <div class="button-container">
     <button id="supportButton">Support Message</button>
   </div>
   <div class="output-container" id="supportBoxes">
     <!-- Dynamic Content will be here -->
   </div>
-  
+
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("generateButton").addEventListener("click", function() {
@@ -138,24 +151,24 @@
     async function generateRandomBox(index, url, containerId) {
       const outputElement = document.createElement('div');
       outputElement.className = (containerId === 'bundleBoxes') ? "output-box" : "support-output-box";
-      
+      const contentElement = document.createElement('div');
+      contentElement.id = `output${containerId}${index}`;
+
       try {
         const response = await fetch(url);
         const text = await response.text();
         const sentences = text.trim().split('^');
         const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
-        const contentElement = document.createElement('div');
-        contentElement.id = `output${containerId}${index}`;
         contentElement.innerHTML = randomSentence;
         outputElement.appendChild(contentElement);
+        document.getElementById(containerId).appendChild(outputElement);
 
         const copyButton = document.createElement('button');
         copyButton.className = "copy-button";
         copyButton.innerHTML = "Copy Text";
         copyButton.onclick = function(event) { copyToClipboard(event, `output${containerId}${index}`) };
-        outputElement.appendChild(copyButton);
+        document.getElementById(containerId).appendChild(copyButton);
 
-        document.getElementById(containerId).appendChild(outputElement);
       } catch (error) {
         console.error('Error loading sentences:', error);
       }
