@@ -48,23 +48,6 @@
       margin: 20px;
     }
 
-    .copy-button {
-      position: absolute;
-      top: 5px;
-      right: 10px;
-      background: transparent;
-      border: 1px solid golden;
-      color: golden;
-      border-radius: 10px;
-      padding: 5px;
-      cursor: pointer;
-      z-index: 2;
-    }
-
-    .copy-button:hover {
-      background-color: rgba(255, 215, 0, 0.2);
-    }
-
     .output-box, .support-output-box {
       border: 2px solid goldenrod;
       border-radius: 10px;
@@ -93,6 +76,22 @@
       height: 100px;
     }
 
+    .copy-button {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: transparent;
+      border: 1px solid golden;
+      color: golden;
+      border-radius: 10px;
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      background-color: rgba(255, 215, 0, 0.2);
+    }
+
     .copy-confirmation {
       position: absolute;
       background-color: rgba(255, 223, 0, 0.7);
@@ -109,25 +108,38 @@
     <button id="generateButton">Bundle</button>
   </div>
   <div class="output-container" id="bundleBoxes">
-    <!-- Initialized empty boxes -->
-    <div class="output-box"></div>
-    <div class="output-box"></div>
-    <div class="output-box"></div>
+    <!-- Dynamic Content will be here -->
   </div>
 
   <div class="button-container">
     <button id="supportButton">Support Message</button>
   </div>
   <div class="output-container" id="supportBoxes">
-    <!-- Initialized empty boxes -->
-    <div class="support-output-box"></div>
-    <div class="support-output-box"></div>
-    <div class="support-output-box"></div>
+    <!-- Dynamic Content will be here -->
   </div>
 
   <script>
     document.getElementById("generateButton").addEventListener("click", generateRandomBundles);
     document.getElementById("supportButton").addEventListener("click", generateSupportMessages);
+
+    function copyToClipboard(event, elementId) {
+      const textToCopy = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(textToCopy);
+
+      const confirmation = document.createElement('div');
+      confirmation.textContent = "Copied 🫡";
+      confirmation.className = "copy-confirmation";
+
+      // position the confirmation element where the mouse clicked
+      confirmation.style.left = `${event.clientX}px`;
+      confirmation.style.top = `${event.clientY}px`;
+
+      document.body.appendChild(confirmation);
+
+      setTimeout(() => {
+        document.body.removeChild(confirmation);
+      }, 2000);
+    }
 
     async function generateRandomBundles() {
       clearPreviousBoxes('bundleBoxes');
@@ -137,25 +149,25 @@
     }
 
     async function generateRandomBundle(index) {
-      const outputElement = createOutputElement('output-box', 'output', index);
-      await populateBundleData(outputElement, index);
-      document.getElementById('bundleBoxes').appendChild(outputElement);
-    }
-
-    function createOutputElement(className, idPrefix, index) {
       const outputElement = document.createElement('div');
-      outputElement.className = className;
-      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard(event, '${idPrefix}${index}')">Copy</button><div id="${idPrefix}${index}"></div>`;
-      return outputElement;
-    }
+      outputElement.className = "output-box";
 
-    async function populateBundleData(outputElement, index) {
       try {
         const response = await fetch('https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
         const text = await response.text();
         const sentences = text.trim().split('^');
+
         const randomSentence = sentences[Math.floor(Math.random() * sentences.length)].replace(/^\d+\./, '');
-        outputElement.querySelector(`#output${index}`).textContent = randomSentence;
+
+        outputElement.innerHTML = `<div id="output${index}">${randomSentence}</div>`;
+        const copyButton = document.createElement('button');
+        copyButton.className = "copy-button";
+        copyButton.innerHTML = "Copy Text";
+        copyButton.onclick = function(event) { copyToClipboard(event, `output${index}`) };
+        outputElement.appendChild(copyButton);
+        
+        document.getElementById('bundleBoxes').appendChild(outputElement);
+
       } catch (error) {
         console.error('Error loading sentences:', error);
       }
@@ -164,50 +176,29 @@
     function generateSupportMessages() {
       clearPreviousBoxes('supportBoxes');
       for (let i = 1; i <= 3; i++) {
-        const outputElement = createOutputElement('support-output-box', 'supportOutput', i);
-        populateSupportMessage(outputElement, i);
-        document.getElementById('supportBoxes').appendChild(outputElement);
+        generateSupportMessage(i);
       }
     }
 
-    function populateSupportMessage(outputElement, index) {
-      const supportMessages = [
-        "Your support means the world to us!",
-        "Thank you for being an amazing supporter!",
-        "Your generosity helps us create great content!",
-        "We appreciate your dedication and support!",
-        "With your support, we can keep creating awesome content!"
-      ];
-      const randomSupportMessage = supportMessages[Math.floor(Math.random() * supportMessages.length)];
-      outputElement.querySelector(`#supportOutput${index}`).textContent = randomSupportMessage;
+    function generateSupportMessage(index) {
+      const outputElement = document.createElement('div');
+      outputElement.className = "support-output-box";
+      outputElement.innerHTML = `Support Message ${index}`;
+
+      document.getElementById('supportBoxes').appendChild(outputElement);
     }
 
-    function copyToClipboard(event, elementId) {
-      const textToCopy = document.getElementById(elementId).textContent;
-      navigator.clipboard.writeText(textToCopy);
-      showCopiedConfirmation(event.clientX, event.clientY);
-    }
-
-    function showCopiedConfirmation(x, y) {
-      const confirmation = document.createElement('div');
-      confirmation.textContent = "Copied 🫡";
-      confirmation.className = "copy-confirmation";
-      confirmation.style.left = `${x}px`;
-      confirmation.style.top = `${y}px`;
-
-      document.body.appendChild(confirmation);
-
-      setTimeout(() => {
-        document.body.removeChild(confirmation);
-      }, 2000);
-    }
-
-    function clearPreviousBoxes(boxId) {
-      const boxContainer = document.getElementById(boxId);
-      while (boxContainer.firstChild) {
-        boxContainer.removeChild(boxContainer.firstChild);
+    function clearPreviousBoxes(containerId) {
+      const container = document.getElementById(containerId);
+      while (container.firstChild) {
+        container.firstChild.remove();
       }
     }
+
+    // Initialize with default boxes
+    generateRandomBundles();
+    generateSupportMessages();
+
   </script>
 </body>
 </html>
