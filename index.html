@@ -25,6 +25,21 @@
       margin: 20px;
     }
 
+    .button-container button {
+      font-size: 18px;
+      padding: 10px 20px;
+      background: linear-gradient(to bottom, goldenrod, darkgoldenrod);
+      border: 2px solid golden;
+      border-radius: 20px;
+      color: black;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .button-container button:active {
+      transform: scale(0.95);
+    }
+
     .output-container {
       display: flex;
       flex-wrap: wrap;
@@ -33,22 +48,31 @@
       margin: 20px;
     }
 
+    .output-box, .support-output-box {
+      border: 2px solid goldenrod;
+      border-radius: 10px;
+      padding: 10px;
+      background-color: rgba(255, 223, 0, 0.1);
+      overflow-y: scroll;
+    }
+
+    .output-box::-webkit-scrollbar, .support-output-box::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .output-box::-webkit-scrollbar-thumb, .support-output-box::-webkit-scrollbar-thumb {
+      background: goldenrod;
+      border-radius: 5px;
+    }
+
     .output-box {
       width: 300px;
       height: 250px;
-      background-color: rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
-      padding: 10px;
-      overflow-y: scroll;
     }
 
     .support-output-box {
       width: 300px;
       height: 100px;
-      background-color: rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
-      padding: 10px;
-      overflow-y: scroll;
     }
   </style>
 </head>
@@ -57,14 +81,20 @@
     <button id="generateButton">Bundle</button>
   </div>
   <div class="output-container" id="bundleBoxes">
-    <!-- Dynamic Content will be here -->
+    <!-- Initialized empty boxes -->
+    <div class="output-box"></div>
+    <div class="output-box"></div>
+    <div class="output-box"></div>
   </div>
 
   <div class="button-container">
     <button id="supportButton">Support Message</button>
   </div>
   <div class="output-container" id="supportBoxes">
-    <!-- Dynamic Content will be here -->
+    <!-- Initialized empty boxes -->
+    <div class="support-output-box"></div>
+    <div class="support-output-box"></div>
+    <div class="support-output-box"></div>
   </div>
 
   <script>
@@ -81,7 +111,7 @@
     async function generateRandomBundle(index) {
       const outputElement = document.createElement('div');
       outputElement.className = "output-box";
-      
+
       try {
         const response = await fetch('https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
         const text = await response.text();
@@ -89,7 +119,7 @@
 
         const randomSentence = sentences[Math.floor(Math.random() * sentences.length)].replace(/^\d+\./, '');
 
-        outputElement.innerHTML = `<button onclick="copyToClipboard('output${index}')">Copy Text</button><div id="output${index}">${randomSentence}</div>`;
+        outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('output${index}')">Copy Text</button><div id="output${index}">${randomSentence}</div>`;
       } catch (error) {
         console.error('Error loading sentences:', error);
       }
@@ -117,7 +147,7 @@
 
       const outputElement = document.createElement('div');
       outputElement.className = "support-output-box";
-      outputElement.innerHTML = `<button onclick="copyToClipboard('supportOutput${index}')">Copy Text</button><div id="supportOutput${index}">${randomSupportMessage}</div>`;
+      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard('supportOutput${index}')">Copy Text</button><div id="supportOutput${index}">${randomSupportMessage}</div>`;
 
       document.getElementById('supportBoxes').appendChild(outputElement);
     }
@@ -126,7 +156,6 @@
       const textToCopy = document.getElementById(elementId).textContent;
       navigator.clipboard.writeText(textToCopy);
 
-      // Show a 'copied' confirmation
       const confirmation = document.createElement('div');
       confirmation.textContent = "Copied 🫡";
       confirmation.style.position = "fixed";
