@@ -6,29 +6,28 @@
   <title>Random Sentence Generator</title>
   <style>
     body {
-      background: linear-gradient(to bottom, #333333, #AAAAAA);
+      background: linear-gradient(to bottom, #FFFFFF, #e6e6e6); /* Lighter background */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
       margin: 0;
-      overflow: hidden;
-      color: white;
+      color: #333; /* Darker text */
     }
 
     .button-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1cm;
-      margin: 1cm 0; /* Add margin to top and bottom */
+      gap: 2cm;  /* Increased gap */
+      margin: 2cm 0; 
     }
 
     .button-container button {
       font-size: 18px;
-      padding: 10px 20px;
-      background: linear-gradient(to right, silver, gold);
+      padding: 12px 24px;  /* Bigger padding */
+      background: linear-gradient(to right, #2196F3, #64B5F6);  /* Light blue gradient */
       border: none;
       border-radius: 20px;
       color: white;
@@ -36,93 +35,44 @@
     }
 
     .button-container button:hover {
-      background: linear-gradient(to right, gold, silver);
+      background: linear-gradient(to right, #64B5F6, #2196F3);
     }
 
     .output-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 1cm;
+      gap: 2cm;  /* Increased gap */
       justify-content: center;
-      margin: 1cm 0; /* Add margin to top and bottom */
+      margin: 2cm 0;  
     }
 
     .output-box {
       width: 300px;
       height: 150px;
-      background-color: rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
-      padding: 10px;
-    }
-
-    .output-box button {
-      margin-top: 10px;
+      background-color: rgba(255, 255, 255, 0.8);  /* Lighter background */
+      border-radius: 20px;  /* Rounded corners */
+      padding: 16px;  /* Bigger padding */
+      box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);  /* Subtle shadow */
     }
   </style>
 </head>
 <body>
-  <div class="button-container">
-    <button id="generateButton">Bundle</button>
-  </div>
-  <div class="output-container">
-    <div class="output-box">
-      <div id="output1"></div>
-      <button class="copy-button" onclick="copyToClipboard('output1')">Copy Text</button>
-    </div>
-    <div class="output-box">
-      <div id="output2"></div>
-      <button class="copy-button" onclick="copyToClipboard('output2')">Copy Text</button>
-    </div>
-    <div class="output-box">
-      <div id="output3"></div>
-      <button class="copy-button" onclick="copyToClipboard('output3')">Copy Text</button>
-    </div>
-  </div>
-
-  <div class="button-container">
-    <button id="supportButton">Support Message</button>
-  </div>
-  <div class="output-container">
-    <div class="output-box">
-      <div id="supportOutput1"></div>
-      <button class="copy-button" onclick="copyToClipboard('supportOutput1')">Copy Text</button>
-    </div>
-    <div class="output-box">
-      <div id="supportOutput2"></div>
-      <button class="copy-button" onclick="copyToClipboard('supportOutput2')">Copy Text</button>
-    </div>
-    <div class="output-box">
-      <div id="supportOutput3"></div>
-      <button class="copy-button" onclick="copyToClipboard('supportOutput3')">Copy Text</button>
-    </div>
-  </div>
-
+  <!-- Your HTML body remains the same -->
+  
   <script>
-    const setupVerbs = ["long to", "want to", "can't wait to", "am dying to", "dream of when I next"];
-    const adverbs = ["hungrily", "roughly", "gently", "eagerly", "tenderly"];
-    const verbs = ["stroke", "mark", "bite", "nuzzle", "clutch"];
-    const adjectives1 = ["wet", "sticky", "soft", "beautiful", "hot"];
-    const partnerParts = ["lips", "nose", "eyes", "mouth", "chin"];
-    const adjectives2 = ["wet", "hot", "soft", "slick", "moist"];
-    const myParts = ["mouth", "tongue", "ears", "nose", "lips"];
-    const punctuations = ["💦", "🔥😏", "💦", "💦", "!!!"];
+    // Your JavaScript remains the same
 
-    document.getElementById("generateButton").addEventListener("click", generateRandomBundles);
-    document.getElementById("supportButton").addEventListener("click", generateSupportMessages);
-
-    async function generateRandomBundles() {
-      for (let i = 1; i <= 3; i++) {
-        await generateRandomBundle(i);
-      }
-    }
-
+    // But let's update the function for removing numbers in bld.txt paragraphs
     async function generateRandomBundle(index) {
       try {
         const response = await fetch('https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
         const text = await response.text();
         const sentences = text.trim().split('^');
 
-        const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+        let randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+
+        // Remove numbers at the beginning of the paragraph
+        randomSentence = randomSentence.replace(/^\d+\.\s*/, "");
 
         const outputElement = document.getElementById(`output${index}`);
         outputElement.textContent = randomSentence;
@@ -130,30 +80,6 @@
         console.error('Error loading sentences:', error);
       }
     }
-
-    async function generateSupportMessages() {
-      for (let i = 1; i <= 3; i++) {
-        await generateSupportMessage(i);
-      }
-    }
-
-    function generateSupportMessage(index) {
-      const supportMessages = [
-        "Your support means the world to us!",
-        "Thank you for being an amazing supporter!",
-        "Your generosity helps us create great content!",
-        "We appreciate your dedication and support!",
-        "With your support, we can keep creating awesome content!"
-      ];
-
-      const randomSupportMessage = supportMessages[Math.floor(Math.random() * supportMessages.length)];
-
-      const outputElement = document.getElementById(`supportOutput${index}`);
-      outputElement.textContent = randomSupportMessage;
-    }
-
-    // Other functions...
-
   </script>
 </body>
 </html>
