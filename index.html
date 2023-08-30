@@ -20,8 +20,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1cm;
-      margin: 1cm 0;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     .button-container button {
@@ -33,6 +33,7 @@
       color: black;
       cursor: pointer;
       transition: box-shadow 0.3s ease;
+      z-index: 1;
     }
 
     .button-container button:hover {
@@ -44,7 +45,7 @@
       flex-wrap: wrap;
       gap: 1cm;
       justify-content: center;
-      margin: 1cm 0;
+      margin: 10px 0;
     }
 
     .output-box {
@@ -53,6 +54,7 @@
       border-radius: 10px;
       padding: 10px;
       overflow-y: auto;
+      position: relative;
     }
 
     .output-box.bundle {
@@ -71,7 +73,12 @@
       border-radius: 10px;
       color: black;
       cursor: pointer;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      z-index: 2;
     }
+
   </style>
 </head>
 <body>
@@ -80,15 +87,15 @@
   </div>
   <div class="output-container">
     <div class="output-box bundle">
-      <button class="copy-button" onclick="copyToClipboard('output1')">Copy Text</button>
+      <button class="copy-button" onclick="copyToClipboard('output1', this)">Copy Text</button>
       <div id="output1"></div>
     </div>
     <div class="output-box bundle">
-      <button class="copy-button" onclick="copyToClipboard('output2')">Copy Text</button>
+      <button class="copy-button" onclick="copyToClipboard('output2', this)">Copy Text</button>
       <div id="output2"></div>
     </div>
     <div class="output-box bundle">
-      <button class="copy-button" onclick="copyToClipboard('output3')">Copy Text</button>
+      <button class="copy-button" onclick="copyToClipboard('output3', this)">Copy Text</button>
       <div id="output3"></div>
     </div>
   </div>
@@ -98,15 +105,15 @@
   </div>
   <div class="output-container">
     <div class="output-box support">
-      <button class="copy-button" onclick="copyToClipboard('supportOutput1')">Copy Text</button>
+      <button class="copy-button" onclick="copyToClipboard('supportOutput1', this)">Copy Text</button>
       <div id="supportOutput1"></div>
     </div>
     <div class="output-box support">
-      <button class="copy-button" onclick="copyToClipboard('supportOutput2')">Copy Text</button>
+      <button class="copy-button" onclick="copyToClipboard('supportOutput2', this)">Copy Text</button>
       <div id="supportOutput2"></div>
     </div>
     <div class="output-box support">
-      <button class="copy-button" onclick="copyToClipboard('supportOutput3')">Copy Text</button>
+      <button class="copy-button" onclick="copyToClipboard('supportOutput3', this)">Copy Text</button>
       <div id="supportOutput3"></div>
     </div>
   </div>
@@ -114,7 +121,7 @@
   <script>
     // Your existing JavaScript code here, such as the generateRandomBundles function and others
     
-    function copyToClipboard(elementId) {
+    function copyToClipboard(elementId, btn) {
       const el = document.getElementById(elementId);
       const range = document.createRange();
       range.selectNodeContents(el);
@@ -127,18 +134,19 @@
       // Show confirmation message
       const confirmation = document.createElement('div');
       confirmation.textContent = 'Copied 🫡';
-      confirmation.style.position = 'fixed';
-      confirmation.style.top = '0';
-      confirmation.style.right = '0';
+      confirmation.style.position = 'absolute';
+      confirmation.style.top = btn.offsetTop + 'px';
+      confirmation.style.left = (btn.offsetLeft - 50) + 'px';
       confirmation.style.backgroundColor = 'gold';
       confirmation.style.color = 'black';
-      confirmation.style.padding = '10px';
+      confirmation.style.padding = '5px';
       confirmation.style.borderRadius = '5px';
-      document.body.appendChild(confirmation);
+      confirmation.style.zIndex = '3';
+      btn.parentElement.appendChild(confirmation);
       
       setTimeout(() => {
         confirmation.style.opacity = '0';
-        setTimeout(() => document.body.removeChild(confirmation), 1000);
+        setTimeout(() => btn.parentElement.removeChild(confirmation), 1000);
       }, 1000);
     }
   </script>
