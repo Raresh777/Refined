@@ -48,12 +48,30 @@
       margin: 20px;
     }
 
+    .copy-button {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      background: transparent;
+      border: 1px solid golden;
+      color: golden;
+      border-radius: 10px;
+      padding: 5px;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .copy-button:hover {
+      background-color: rgba(255, 215, 0, 0.2);
+    }
+
     .output-box, .support-output-box {
       border: 2px solid goldenrod;
       border-radius: 10px;
       padding: 10px;
       background-color: rgba(255, 223, 0, 0.1);
       overflow-y: scroll;
+      position: relative; /* Relative positioning for copy button */
     }
 
     .output-box::-webkit-scrollbar, .support-output-box::-webkit-scrollbar {
@@ -77,11 +95,12 @@
 
     .copy-confirmation {
       position: absolute;
-      background-color: golden;
+      background-color: rgba(255, 223, 0, 0.7);
       color: black;
-      padding: 5px;
-      border-radius: 5px;
+      padding: 10px;
+      border-radius: 50%;
       z-index: 1000;
+      border: 2px solid golden;
     }
   </style>
 </head>
@@ -126,7 +145,7 @@
     function createOutputElement(className, idPrefix, index) {
       const outputElement = document.createElement('div');
       outputElement.className = className;
-      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard(event, '${idPrefix}${index}')">Copy Text</button><div id="${idPrefix}${index}"></div>`;
+      outputElement.innerHTML = `<button class="copy-button" onclick="copyToClipboard(event, '${idPrefix}${index}')">Copy</button><div id="${idPrefix}${index}"></div>`;
       return outputElement;
     }
 
