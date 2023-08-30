@@ -49,24 +49,16 @@
       padding: 10px;
       background-color: rgba(255, 223, 0, 0.1);
       overflow-y: scroll;
+      width: 300px;
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    .output-box::-webkit-scrollbar, .support-output-box::-webkit-scrollbar {
-      width: 10px;
-    }
-    .output-box::-webkit-scrollbar-thumb, .support-output-box::-webkit-scrollbar-thumb {
-      background: goldenrod;
-      border-radius: 5px;
-    }
     .output-box {
-      width: 300px;
       height: 250px;
     }
     .support-output-box {
-      width: 300px;
       height: 100px;
     }
     .copy-button {
@@ -105,14 +97,18 @@
   <div class="output-container" id="supportBoxes">
     <!-- Dynamic Content will be here -->
   </div>
-
+  
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      document.getElementById("generateButton").addEventListener("click", generateRandomBundles);
-      document.getElementById("supportButton").addEventListener("click", generateSupportMessages);
+      document.getElementById("generateButton").addEventListener("click", function() {
+        generateMessages('bundleBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
+      });
+      document.getElementById("supportButton").addEventListener("click", function() {
+        generateMessages('supportBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt');
+      });
 
-      generateRandomBundles();
-      generateSupportMessages();
+      generateMessages('bundleBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
+      generateMessages('supportBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt');
     });
 
     function copyToClipboard(event, elementId) {
@@ -132,37 +128,33 @@
       }, 2000);
     }
 
-    async function generateRandomBundles() {
-      clearPreviousBoxes('bundleBoxes');
+    async function generateMessages(containerId, url) {
+      clearPreviousBoxes(containerId);
       for (let i = 1; i <= 3; i++) {
-        await generateRandomBox(i, 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt', 'bundleBoxes');
-      }
-    }
-
-    async function generateSupportMessages() {
-      clearPreviousBoxes('supportBoxes');
-      for (let i = 1; i <= 3; i++) {
-        await generateRandomBox(i, 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt', 'supportBoxes');
+        await generateRandomBox(i, url, containerId);
       }
     }
 
     async function generateRandomBox(index, url, containerId) {
       const outputElement = document.createElement('div');
-      outputElement.className = containerId === 'bundleBoxes' ? 'output-box' : 'support-output-box';
+      outputElement.className = (containerId === 'bundleBoxes') ? "output-box" : "support-output-box";
+      
       try {
         const response = await fetch(url);
         const text = await response.text();
         const sentences = text.trim().split('^');
-        const randomSentence = sentences[Math.floor(Math.random() * sentences.length)].replace(/^\d+\./, '');
-        const outputText = document.createElement('div');
-        outputText.id = `output${containerId}${index}`;
-        outputText.textContent = randomSentence;
-        outputElement.appendChild(outputText);
+        const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+        const contentElement = document.createElement('div');
+        contentElement.id = `output${containerId}${index}`;
+        contentElement.innerHTML = randomSentence;
+        outputElement.appendChild(contentElement);
+
         const copyButton = document.createElement('button');
         copyButton.className = "copy-button";
         copyButton.innerHTML = "Copy Text";
         copyButton.onclick = function(event) { copyToClipboard(event, `output${containerId}${index}`) };
         outputElement.appendChild(copyButton);
+
         document.getElementById(containerId).appendChild(outputElement);
       } catch (error) {
         console.error('Error loading sentences:', error);
