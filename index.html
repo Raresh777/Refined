@@ -64,7 +64,6 @@
   <div class="main-container">
     <div class="button-container">
       <button id="generateButton">Bundle</button>
-      <button id="supportButton">Support Message</button>
     </div>
 
     <div class="output-container">
@@ -79,6 +78,25 @@
       <div class="output-box">
         <div id="output3"></div>
         <button class="copy-button" onclick="copyToClipboard('output3')">Copy Text</button>
+      </div>
+    </div>
+
+    <div class="button-container">
+      <button id="supportButton">Support Message</button>
+    </div>
+
+    <div class="output-container">
+      <div class="output-box">
+        <div id="supportOutput1"></div>
+        <button class="copy-button" onclick="copyToClipboard('supportOutput1')">Copy Text</button>
+      </div>
+      <div class="output-box">
+        <div id="supportOutput2"></div>
+        <button class="copy-button" onclick="copyToClipboard('supportOutput2')">Copy Text</button>
+      </div>
+      <div class="output-box">
+        <div id="supportOutput3"></div>
+        <button class="copy-button" onclick="copyToClipboard('supportOutput3')">Copy Text</button>
       </div>
     </div>
   </div>
@@ -131,7 +149,7 @@
       const outputElement = document.getElementById(`supportOutput${index}`);
       outputElement.textContent = randomSupportMessage;
     }
-    
+
     // Function to copy text
     function copyToClipboard(elementId) {
       const text = document.getElementById(elementId).textContent;
