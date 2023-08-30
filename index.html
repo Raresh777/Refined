@@ -17,47 +17,8 @@
       color: white;
     }
 
-    .button-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1cm;
-      margin: 1cm 0; /* Add margin to top and bottom */
-    }
+    /* ... (other styles) ... */
 
-    .button-container button {
-      font-size: 18px;
-      padding: 10px 20px;
-      background: linear-gradient(to right, silver, gold);
-      border: none;
-      border-radius: 20px;
-      color: white;
-      cursor: pointer;
-    }
-
-    .button-container button:hover {
-      background: linear-gradient(to right, gold, silver);
-    }
-
-    .output-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1cm;
-      justify-content: center;
-      margin: 1cm 0; /* Add margin to top and bottom */
-    }
-
-    .output-box {
-      width: 300px;
-      height: 150px;
-      background-color: rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
-      padding: 10px;
-    }
-
-    .output-box button {
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
@@ -109,26 +70,20 @@
     document.getElementById("generateButton").addEventListener("click", generateRandomBundles);
     document.getElementById("supportButton").addEventListener("click", generateSupportMessages);
 
-    function generateRandomBundles() {
-      for (let i = 1; i <= 3; i++) {
-        generateRandomBundle(i);
+    async function generateRandomBundles() {
+      try {
+        const response = await fetch('https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
+        const text = await response.text();
+
+        const texts = text.trim().split('\n');
+
+        for (let i = 1; i <= 3; i++) {
+          const outputElement = document.getElementById(`output${i}`);
+          outputElement.textContent = texts[Math.floor(Math.random() * texts.length)];
+        }
+      } catch (error) {
+        console.error('Error fetching or processing text:', error);
       }
-    }
-
-    function generateRandomBundle(index) {
-      const randomSetupVerb = setupVerbs[Math.floor(Math.random() * setupVerbs.length)];
-      const randomAdverb = adverbs[Math.floor(Math.random() * adverbs.length)];
-      const randomVerb = verbs[Math.floor(Math.random() * verbs.length)];
-      const randomAdjective1 = adjectives1[Math.floor(Math.random() * adjectives1.length)];
-      const randomPartnerPart = partnerParts[Math.floor(Math.random() * partnerParts.length)];
-      const randomAdjective2 = adjectives2[Math.floor(Math.random() * adjectives2.length)];
-      const randomMyPart = myParts[Math.floor(Math.random() * myParts.length)];
-      const randomPunctuation = punctuations[Math.floor(Math.random() * punctuations.length)];
-
-      const sentence = `I ${randomSetupVerb} ${randomAdverb} ${randomVerb} your ${randomAdjective1} ${randomPartnerPart} with my ${randomAdjective2} ${randomMyPart} ${randomPunctuation}`;
-
-      const outputElement = document.getElementById(`output${index}`);
-      outputElement.textContent = sentence;
     }
 
     function generateSupportMessages() {
@@ -137,33 +92,8 @@
       }
     }
 
-    function generateSupportMessage(index) {
-      const supportMessages = [
-        "Your support means the world to us!",
-        "Thank you for being an amazing supporter!",
-        "Your generosity helps us create great content!",
-        "We appreciate your dedication and support!",
-        "With your support, we can keep creating awesome content!"
-      ];
+    /* ... (rest of the code) ... */
 
-      const randomSupportMessage = supportMessages[Math.floor(Math.random() * supportMessages.length)];
-
-      const outputElement = document.getElementById(`supportOutput${index}`);
-      outputElement.textContent = randomSupportMessage;
-    }
-
-    function copyToClipboard(elementId) {
-      const textElement = document.getElementById(elementId);
-      const text = textElement.textContent;
-
-      navigator.clipboard.writeText(text)
-        .then(() => {
-          alert('Text copied to clipboard');
-        })
-        .catch((error) => {
-          console.error('Error copying text to clipboard:', error);
-        });
-    }
   </script>
 </body>
 </html>
