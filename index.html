@@ -6,26 +6,25 @@
   <title>Random Sentence Generator</title>
   <style>
     body {
-      background: linear-gradient(to bottom, #333333, silver);
+      background: linear-gradient(to right, #333333, silver);
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      justify-content: center;
+      justify-content: space-around;
       height: 100vh;
       margin: 0;
-      overflow: auto;
       color: gold;
+      overflow: auto;
     }
 
-    .button-container {
+    .button-and-output-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      margin: 20px;
     }
 
-    .button-container button {
+    button {
       font-size: 18px;
       padding: 10px 20px;
       background: linear-gradient(to bottom, goldenrod, darkgoldenrod);
@@ -36,16 +35,15 @@
       transition: transform 0.1s ease;
     }
 
-    .button-container button:active {
+    button:active {
       transform: scale(0.95);
     }
 
     .output-container {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 10px;
-      align-items: center;
-      margin: 20px;
+      align-items: flex-start;
     }
 
     .output-box, .support-output-box {
@@ -53,13 +51,9 @@
       border-radius: 10px;
       padding: 10px;
       background-color: rgba(255, 223, 0, 0.1);
-      width: 300px;
       overflow-y: scroll;
       height: 250px;
-    }
-
-    .support-output-box {
-      height: 100px;
+      width: 300px;
     }
 
     .output-box::-webkit-scrollbar, .support-output-box::-webkit-scrollbar {
@@ -97,18 +91,18 @@
   </style>
 </head>
 <body>
-  <div class="button-container">
+  <div class="button-and-output-container">
     <button id="generateButton">Bundle</button>
-  </div>
-  <div class="output-container" id="bundleBoxes">
-    <!-- Dynamic Content will be here -->
+    <div class="output-container" id="bundleBoxes">
+      <!-- Dynamic Content will be here -->
+    </div>
   </div>
 
-  <div class="button-container">
+  <div class="button-and-output-container">
     <button id="supportButton">Support Message</button>
-  </div>
-  <div class="output-container" id="supportBoxes">
-    <!-- Dynamic Content will be here -->
+    <div class="output-container" id="supportBoxes">
+      <!-- Dynamic Content will be here -->
+    </div>
   </div>
 
   <script>
