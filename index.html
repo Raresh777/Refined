@@ -6,28 +6,24 @@
   <title>Random Sentence Generator</title>
   <style>
     body {
-      background: linear-gradient(to right, #333333, silver);
+      background: linear-gradient(to bottom, #333333, silver);
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
       margin: 0;
+      overflow: auto;
       color: gold;
-      overflow: hidden; /* disable scrolling */
     }
-
-    .button-and-output-container {
+    .button-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      width: 45%; /* reduced width */
-      max-height: 100%;
-      overflow: hidden; /* disable scrolling */
+      margin: 20px;
     }
-
-    button {
+    .button-container button {
       font-size: 18px;
       padding: 10px 20px;
       background: linear-gradient(to bottom, goldenrod, darkgoldenrod);
@@ -35,58 +31,78 @@
       border-radius: 20px;
       color: black;
       cursor: pointer;
+      transition: transform 0.1s ease;
     }
-
+    .button-container button:active {
+      transform: scale(0.95);
+    }
     .output-container {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
       gap: 10px;
-      align-items: flex-start;
-      max-height: 75%; /* control height */
-      overflow-y: auto;
+      justify-content: center;
+      margin: 20px;
     }
-
     .output-box, .support-output-box {
       border: 2px solid goldenrod;
       border-radius: 10px;
       padding: 10px;
       background-color: rgba(255, 223, 0, 0.1);
       overflow-y: scroll;
-      height: 100px; /* reduced height */
-      width: 100%; /* take full width */
+      width: 300px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-
-    .output-box::-webkit-scrollbar, .support-output-box::-webkit-scrollbar {
-      width: 10px;
+    .output-box {
+      height: 250px;
     }
-
-    .output-box::-webkit-scrollbar-thumb, .support-output-box::-webkit-scrollbar-thumb {
-      background: goldenrod;
-      border-radius: 5px;
+    .support-output-box {
+      height: 100px;
+    }
+    .copy-button {
+      margin-top: 10px;
+      background: transparent;
+      border: 1px solid gold;
+      color: gold;
+      border-radius: 10px;
+      padding: 5px;
+      cursor: pointer;
+    }
+    .copy-button:hover {
+      background-color: rgba(255, 215, 0, 0.2);
+    }
+    .copy-confirmation {
+      position: absolute;
+      background-color: rgba(255, 223, 0, 0.7);
+      color: black;
+      padding: 10px;
+      border-radius: 50%;
+      z-index: 1000;
+      border: 2px solid gold;
     }
   </style>
 </head>
 <body>
-  <div class="button-and-output-container">
+  <div class="button-container">
     <button id="generateButton">Bundle</button>
-    <div class="output-container" id="bundleBoxes">
-      <!-- Dynamic Content will be here -->
-    </div>
   </div>
-
-  <div class="button-and-output-container">
+  <div class="output-container" id="bundleBoxes">
+    <!-- Dynamic Content will be here -->
+  </div>
+  <div class="button-container">
     <button id="supportButton">Support Message</button>
-    <div class="output-container" id="supportBoxes">
-      <!-- Dynamic Content will be here -->
-    </div>
   </div>
-
+  <div class="output-container" id="supportBoxes">
+    <!-- Dynamic Content will be here -->
+  </div>
+  
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("generateButton").addEventListener("click", function() {
         generateMessages('bundleBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
       });
-
       document.getElementById("supportButton").addEventListener("click", function() {
         generateMessages('supportBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt');
       });
@@ -95,47 +111,60 @@
       generateMessages('supportBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt');
     });
 
-    function generateMessages(containerId, url) {
+    function copyToClipboard(event, elementId) {
+      const textToCopy = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(textToCopy);
+
+      const confirmation = document.createElement('div');
+      confirmation.textContent = "Copied 🫡";
+      confirmation.className = "copy-confirmation";
+      confirmation.style.left = `${event.clientX}px`;
+      confirmation.style.top = `${event.clientY}px`;
+
+      document.body.appendChild(confirmation);
+
+      setTimeout(() => {
+        document.body.removeChild(confirmation);
+      }, 2000);
+    }
+
+    async function generateMessages(containerId, url) {
       clearPreviousBoxes(containerId);
       for (let i = 1; i <= 3; i++) {
-        generateRandomBox(i, url, containerId);
+        await generateRandomBox(i, url, containerId);
       }
     }
 
     async function generateRandomBox(index, url, containerId) {
       const outputElement = document.createElement('div');
       outputElement.className = (containerId === 'bundleBoxes') ? "output-box" : "support-output-box";
-      const contentElement = document.createElement('div');
-      contentElement.id = `output${containerId}${index}`;
-
+      
       try {
         const response = await fetch(url);
         const text = await response.text();
         const sentences = text.trim().split('^');
         const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+        const contentElement = document.createElement('div');
+        contentElement.id = `output${containerId}${index}`;
         contentElement.innerHTML = randomSentence;
         outputElement.appendChild(contentElement);
-        document.getElementById(containerId).appendChild(outputElement);
 
         const copyButton = document.createElement('button');
+        copyButton.className = "copy-button";
         copyButton.innerHTML = "Copy Text";
-        copyButton.onclick = function() { copyToClipboard(contentElement.id) };
-        document.getElementById(containerId).appendChild(copyButton);
+        copyButton.onclick = function(event) { copyToClipboard(event, `output${containerId}${index}`) };
+        outputElement.appendChild(copyButton);
 
+        document.getElementById(containerId).appendChild(outputElement);
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error loading sentences:', error);
       }
-    }
-
-    function copyToClipboard(elementId) {
-      const textToCopy = document.getElementById(elementId).textContent;
-      navigator.clipboard.writeText(textToCopy);
     }
 
     function clearPreviousBoxes(containerId) {
       const container = document.getElementById(containerId);
       while (container.firstChild) {
-        container.removeChild(container.firstChild);
+        container.firstChild.remove();
       }
     }
   </script>
