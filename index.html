@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Random Sentence Generator</title>
   <style>
+    /* General styles */
     body {
       background: linear-gradient(to bottom, #333333, silver);
       display: flex;
@@ -16,6 +17,7 @@
       overflow: auto;
       color: gold;
     }
+    /* Button container styles */
     .button-container {
       display: flex;
       flex-direction: column;
@@ -36,6 +38,7 @@
     .button-container button:active {
       transform: scale(0.95);
     }
+    /* Output container styles */
     .output-container {
       display: flex;
       flex-wrap: wrap;
@@ -56,12 +59,28 @@
       align-items: center;
       justify-content: space-between;
     }
+    /* Custom Scrollbar */
+    .output-box::-webkit-scrollbar,
+    .support-output-box::-webkit-scrollbar {
+      width: 8px;
+    }
+    .output-box::-webkit-scrollbar-thumb,
+    .support-output-box::-webkit-scrollbar-thumb {
+      background-color: goldenrod;
+      border-radius: 4px;
+    }
+    .output-box::-webkit-scrollbar-thumb:hover,
+    .support-output-box::-webkit-scrollbar-thumb:hover {
+      background-color: darkgoldenrod;
+    }
+    /* Output box heights */
     .output-box {
       height: 250px;
     }
     .support-output-box {
       height: 100px;
     }
+    /* Copy button */
     .copy-button {
       margin-top: 30px;
       padding: 2px 5px;
@@ -101,6 +120,7 @@
   </div>
 
   <script>
+    // JavaScript code
     document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("generateButton").addEventListener("click", function() {
         generateMessages('bundleBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
@@ -108,7 +128,7 @@
       document.getElementById("supportButton").addEventListener("click", function() {
         generateMessages('supportBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt');
       });
-
+      
       generateMessages('bundleBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
       generateMessages('supportBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt');
     });
@@ -116,15 +136,15 @@
     function copyToClipboard(event, elementId) {
       const textToCopy = document.getElementById(elementId).textContent;
       navigator.clipboard.writeText(textToCopy);
-
+      
       const confirmation = document.createElement('div');
       confirmation.textContent = "Copied 🫡";
       confirmation.className = "copy-confirmation";
       confirmation.style.left = `${event.clientX}px`;
       confirmation.style.top = `${event.clientY}px`;
-
+      
       document.body.appendChild(confirmation);
-
+      
       setTimeout(() => {
         document.body.removeChild(confirmation);
       }, 2000);
@@ -146,17 +166,20 @@
         const text = await response.text();
         const sentences = text.trim().split('^');
         const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+        
         const contentElement = document.createElement('div');
         contentElement.id = `output${containerId}${index}`;
         contentElement.innerHTML = randomSentence;
+        
         outputElement.appendChild(contentElement);
 
         const copyButton = document.createElement('button');
         copyButton.className = "copy-button";
         copyButton.innerHTML = "Copy Text";
         copyButton.onclick = function(event) { copyToClipboard(event, `output${containerId}${index}`) };
+        
         outputElement.appendChild(copyButton);
-
+        
         document.getElementById(containerId).appendChild(outputElement);
       } catch (error) {
         console.error('Error loading sentences:', error);
