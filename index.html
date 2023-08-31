@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Random Sentence Generator</title>
   <style>
+    /* Add scrollbar styles */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: goldenrod;
+      border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: gold;
+    }
+
     body {
       background: linear-gradient(to bottom, #333333, silver);
       display: flex;
@@ -14,7 +26,7 @@
       height: 100vh;
       margin: 0;
       overflow: auto;
-      color: gold;
+      color: black; /* Font color changed to black */
     }
     .button-container {
       display: flex;
