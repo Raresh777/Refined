@@ -66,9 +66,9 @@
       margin-top: 30px;
       padding: 2px 5px;
       font-size: 12px;
-      background: transparent;
-      border: 1px solid gold;
-      color: gold;
+      background: linear-gradient(to bottom, #C0C0C0, #808080);
+      border: 1px solid silver;
+      color: black;
       border-radius: 10px;
       cursor: pointer;
     }
@@ -84,19 +84,6 @@
       z-index: 1000;
       border: 2px solid gold;
     }
-    .output-box::-webkit-scrollbar,
-    .support-output-box::-webkit-scrollbar {
-      width: 8px;
-    }
-    .output-box::-webkit-scrollbar-thumb,
-    .support-output-box::-webkit-scrollbar-thumb {
-      background-color: goldenrod;
-      border-radius: 4px;
-    }
-    .output-box::-webkit-scrollbar-track,
-    .support-output-box::-webkit-scrollbar-track {
-      background-color: rgba(255, 223, 0, 0.1);
-    }
   </style>
 </head>
 <body>
@@ -104,13 +91,15 @@
     <button id="generateButton">Bundle</button>
   </div>
   <div class="output-container" id="bundleBoxes">
+    <!-- Dynamic Content will be here -->
   </div>
   <div class="button-container">
     <button id="supportButton">Support Message</button>
   </div>
   <div class="output-container" id="supportBoxes">
+    <!-- Dynamic Content will be here -->
   </div>
-  
+
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("generateButton").addEventListener("click", function() {
@@ -151,7 +140,7 @@
     async function generateRandomBox(index, url, containerId) {
       const outputElement = document.createElement('div');
       outputElement.className = (containerId === 'bundleBoxes') ? "output-box" : "support-output-box";
-      
+
       try {
         const response = await fetch(url);
         const text = await response.text();
@@ -164,7 +153,7 @@
 
         const copyButton = document.createElement('button');
         copyButton.className = "copy-button";
-        copyButton.innerHTML = "Copy";
+        copyButton.innerHTML = "Copy Text";
         copyButton.onclick = function(event) { copyToClipboard(event, `output${containerId}${index}`) };
         outputElement.appendChild(copyButton);
 
