@@ -10,11 +10,11 @@
       display: flex;
       flex-direction: row;
       align-items: center;
-      justify-content: space-around;
+      justify-content: center;
       height: 100vh;
       margin: 0;
       color: gold;
-      overflow: auto;
+      overflow: hidden; /* disable scrolling */
     }
 
     .button-and-output-container {
@@ -22,6 +22,9 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
+      width: 45%; /* reduced width */
+      max-height: 100%;
+      overflow: hidden; /* disable scrolling */
     }
 
     button {
@@ -32,18 +35,15 @@
       border-radius: 20px;
       color: black;
       cursor: pointer;
-      transition: transform 0.1s ease;
-    }
-
-    button:active {
-      transform: scale(0.95);
     }
 
     .output-container {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       gap: 10px;
       align-items: flex-start;
+      max-height: 75%; /* control height */
+      overflow-y: auto;
     }
 
     .output-box, .support-output-box {
@@ -52,8 +52,8 @@
       padding: 10px;
       background-color: rgba(255, 223, 0, 0.1);
       overflow-y: scroll;
-      height: 250px;
-      width: 300px;
+      height: 100px; /* reduced height */
+      width: 100%; /* take full width */
     }
 
     .output-box::-webkit-scrollbar, .support-output-box::-webkit-scrollbar {
@@ -63,30 +63,6 @@
     .output-box::-webkit-scrollbar-thumb, .support-output-box::-webkit-scrollbar-thumb {
       background: goldenrod;
       border-radius: 5px;
-    }
-
-    .copy-button {
-      margin-top: 10px;
-      background: transparent;
-      border: 1px solid gold;
-      color: gold;
-      border-radius: 10px;
-      padding: 5px;
-      cursor: pointer;
-    }
-
-    .copy-button:hover {
-      background-color: rgba(255, 215, 0, 0.2);
-    }
-
-    .copy-confirmation {
-      position: absolute;
-      background-color: rgba(255, 223, 0, 0.7);
-      color: black;
-      padding: 10px;
-      border-radius: 50%;
-      z-index: 1000;
-      border: 2px solid gold;
     }
   </style>
 </head>
@@ -110,6 +86,7 @@
       document.getElementById("generateButton").addEventListener("click", function() {
         generateMessages('bundleBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt');
       });
+
       document.getElementById("supportButton").addEventListener("click", function() {
         generateMessages('supportBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt');
       });
@@ -118,27 +95,10 @@
       generateMessages('supportBoxes', 'https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt');
     });
 
-    function copyToClipboard(event, elementId) {
-      const textToCopy = document.getElementById(elementId).textContent;
-      navigator.clipboard.writeText(textToCopy);
-
-      const confirmation = document.createElement('div');
-      confirmation.textContent = "Copied 🫡";
-      confirmation.className = "copy-confirmation";
-      confirmation.style.left = `${event.clientX}px`;
-      confirmation.style.top = `${event.clientY}px`;
-
-      document.body.appendChild(confirmation);
-
-      setTimeout(() => {
-        document.body.removeChild(confirmation);
-      }, 2000);
-    }
-
-    async function generateMessages(containerId, url) {
+    function generateMessages(containerId, url) {
       clearPreviousBoxes(containerId);
       for (let i = 1; i <= 3; i++) {
-        await generateRandomBox(i, url, containerId);
+        generateRandomBox(i, url, containerId);
       }
     }
 
@@ -158,20 +118,24 @@
         document.getElementById(containerId).appendChild(outputElement);
 
         const copyButton = document.createElement('button');
-        copyButton.className = "copy-button";
         copyButton.innerHTML = "Copy Text";
-        copyButton.onclick = function(event) { copyToClipboard(event, `output${containerId}${index}`) };
+        copyButton.onclick = function() { copyToClipboard(contentElement.id) };
         document.getElementById(containerId).appendChild(copyButton);
 
       } catch (error) {
-        console.error('Error loading sentences:', error);
+        console.error('Error:', error);
       }
+    }
+
+    function copyToClipboard(elementId) {
+      const textToCopy = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(textToCopy);
     }
 
     function clearPreviousBoxes(containerId) {
       const container = document.getElementById(containerId);
       while (container.firstChild) {
-        container.firstChild.remove();
+        container.removeChild(container.firstChild);
       }
     }
   </script>
