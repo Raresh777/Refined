@@ -183,6 +183,9 @@
                 let randomIndex = Math.floor(Math.random() * sentences.length);
                 let selectedSentence = sentences[randomIndex];
                 sentences.splice(randomIndex, 1); // Remove the selected sentence to prevent repetition
+                
+                console.log("Selected:", selectedSentence);
+
                 await generateBox(i, selectedSentence, containerId);
             }
         }
@@ -191,6 +194,8 @@
             try {
                 const response = await fetch(url);
                 const text = await response.text();
+
+                console.log(sentences);
 
                 // This will split the text by the '^' character and remove any empty or whitespace-only strings.
                 return text.split("^").filter(sentence => sentence.trim().length > 0);
