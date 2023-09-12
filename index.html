@@ -160,25 +160,17 @@
         const confirmation = document.createElement("div");
         confirmation.textContent = "Copied 🫡";
         confirmation.className = "copy-confirmation";
-        confirmation.style.left = `${event.clientX}px`;
-        confirmation.style.top = `${event.clientY}px`;
+        event.target.appendChild(confirmation);
 
-        document.body.appendChild(confirmation);
-
-        setTimeout(() => {
-            document.body.removeChild(confirmation);
-        }, 2000);
+        setTimeout(function () {
+            confirmation.remove();
+        }, 1500);
     }
 
-    async function generateMessages(containerId, url) {
-        clearPreviousBoxes(containerId);
-        let sentences = await fetchSentences(url);
-        let selectedSentences = [];
-        for (let i = 1; i <= 3; i++) {
-            let randomIndex = Math.floor(Math.random() * sentences.length);
-            selectedSentences.push(sentences[randomIndex]);
-            sentences.splice(randomIndex, 1); // Remove the selected sentence to prevent repetition
-            await generateBox(i, selectedSentences[i - 1], containerId);
+    function clearPreviousBoxes(containerId) {
+        const container = document.getElementById(containerId);
+        while (container.firstChild) {
+            container.firstChild.remove();
         }
     }
 
@@ -186,39 +178,48 @@
         try {
             const response = await fetch(url);
             const text = await response.text();
-            return text.trim().split("^");
+            return text.split("\n").filter(sentence => sentence.trim().length > 0);
         } catch (error) {
-            console.error("Error loading sentences:", error);
-            return [];
+            console.error("Error fetching sentences:", error);
+        }
+        return [];
+    }
+
+    async function generateMessages(containerId, url) {
+        clearPreviousBoxes(containerId);
+        let sentences = await fetchSentences(url);
+        let usedIndexes = [];
+
+        for (let i = 1; i <= 3; i++) {
+            let randomIndex;
+
+            do {
+                randomIndex = Math.floor(Math.random() * sentences.length);
+            } while (usedIndexes.includes(randomIndex));
+
+            usedIndexes.push(randomIndex);
+
+            await generateBox(i, sentences[randomIndex], containerId);
         }
     }
 
-    async function generateBox(index, sentence, containerId) {
-        const outputElement = document.createElement("div");
-        outputElement.className =
-            containerId === "bundleBoxes" ? "output-box" : "support-output-box";
-
-        const contentElement = document.createElement("div");
-        contentElement.id = `output${containerId}${index}`;
-        contentElement.innerHTML = sentence;
-        outputElement.appendChild(contentElement);
-
-        const copyButton = document.createElement("button");
-        copyButton.className = "copy-button";
-        copyButton.innerHTML = "Copy Text";
-        copyButton.onclick = function (event) {
-            copyToClipboard(event, `output${containerId}${index}`);
-        };
-        outputElement.appendChild(copyButton);
-
-        document.getElementById(containerId).appendChild(outputElement);
-    }
-
-    function clearPreviousBoxes(containerId) {
+    function generateBox(index, content, containerId) {
         const container = document.getElementById(containerId);
-        while (container.firstChild) {
-            container.removeChild(container.lastChild);
-        }
+        const box = document.createElement("div");
+        box.className =
+            containerId === "bundleBoxes" ? "output-box" : "support-output-box";
+        const contentElement = document.createElement("div");
+        contentElement.textContent = content;
+        box.appendChild(contentElement);
+        const copyButton = document.createElement("button");
+        copyButton.textContent = "Copy";
+        copyButton.className = "copy-button";
+        copyButton.addEventListener("click", function (event) {
+            copyToClipboard(event, contentElement.id);
+        });
+        contentElement.id = `boxContent${index}`;
+        box.appendChild(copyButton);
+        container.appendChild(box);
     }
 </script>
 </body>
