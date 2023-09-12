@@ -160,66 +160,50 @@
         const confirmation = document.createElement("div");
         confirmation.textContent = "Copied 🫡";
         confirmation.className = "copy-confirmation";
-        event.target.appendChild(confirmation);
+        confirmation.style.left = `${event.clientX}px`;
+        confirmation.style.top = `${event.clientY}px`;
+        document.body.appendChild(confirmation);
 
-        setTimeout(function () {
-            confirmation.remove();
+        setTimeout(() => {
+            document.body.removeChild(confirmation);
         }, 1500);
-    }
-
-    function clearPreviousBoxes(containerId) {
-        const container = document.getElementById(containerId);
-        while (container.firstChild) {
-            container.firstChild.remove();
-        }
     }
 
     async function fetchSentences(url) {
         try {
             const response = await fetch(url);
             const text = await response.text();
-            return text.split("\n").filter(sentence => sentence.trim().length > 0);
+            return text.split("^").filter(sentence => sentence.trim().length > 0);
         } catch (error) {
             console.error("Error fetching sentences:", error);
         }
         return [];
     }
 
-    async function generateMessages(containerId, url) {
-        clearPreviousBoxes(containerId);
-        let sentences = await fetchSentences(url);
-        let usedIndexes = [];
+    function generateMessages(boxType, url) {
+        fetchSentences(url).then((sentences) => {
+            const container = document.getElementById(boxType);
+            container.innerHTML = ""; // Clear any previous content
+            const messageCount = boxType === "bundleBoxes" ? 3 : 3; // Depending on the boxType, we show a certain number of messages.
 
-        for (let i = 1; i <= 3; i++) {
-            let randomIndex;
+            for (let i = 0; i < messageCount; i++) {
+                const box = document.createElement("div");
+                box.className =
+                    boxType === "bundleBoxes" ? "output-box" : "support-output-box";
+                const randomIndex = Math.floor(Math.random() * sentences.length);
+                box.textContent = sentences[randomIndex];
 
-            do {
-                randomIndex = Math.floor(Math.random() * sentences.length);
-            } while (usedIndexes.includes(randomIndex));
-
-            usedIndexes.push(randomIndex);
-
-            await generateBox(i, sentences[randomIndex], containerId);
-        }
-    }
-
-    function generateBox(index, content, containerId) {
-        const container = document.getElementById(containerId);
-        const box = document.createElement("div");
-        box.className =
-            containerId === "bundleBoxes" ? "output-box" : "support-output-box";
-        const contentElement = document.createElement("div");
-        contentElement.textContent = content;
-        box.appendChild(contentElement);
-        const copyButton = document.createElement("button");
-        copyButton.textContent = "Copy";
-        copyButton.className = "copy-button";
-        copyButton.addEventListener("click", function (event) {
-            copyToClipboard(event, contentElement.id);
+                const copyButton = document.createElement("button");
+                copyButton.className = "copy-button";
+                copyButton.textContent = "Copy";
+                copyButton.onclick = (event) => {
+                    copyToClipboard(event, box.id);
+                };
+                box.id = `outputBox${Date.now()}${i}`; // Give each box a unique ID
+                box.appendChild(copyButton);
+                container.appendChild(box);
+            }
         });
-        contentElement.id = `boxContent${index}`;
-        box.appendChild(copyButton);
-        container.appendChild(box);
     }
 </script>
 </body>
