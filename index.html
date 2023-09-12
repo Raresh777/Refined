@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -62,7 +63,8 @@
             margin: 20px;
         }
 
-        .output-box, .support-output-box {
+        .output-box,
+        .support-output-box {
             border: 2px solid goldenrod;
             border-radius: 10px;
             padding: 10px;
@@ -110,101 +112,122 @@
         }
     </style>
 </head>
+
 <body>
-<div class="button-container">
-    <button id="generateButton">Bundle</button>
-</div>
-<div class="output-container" id="bundleBoxes">
-    <!-- Dynamic Content will be here -->
-</div>
-<div class="button-container">
-    <button id="supportButton">Support Message</button>
-</div>
-<div class="output-container" id="supportBoxes">
-    <!-- Dynamic Content will be here -->
-</div>
+    <div class="button-container">
+        <button id="generateButton">Bundle</button>
+    </div>
+    <div class="output-container" id="bundleBoxes">
+        <!-- Dynamic Content will be here -->
+    </div>
+    <div class="button-container">
+        <button id="supportButton">Support Message</button>
+    </div>
+    <div class="output-container" id="supportBoxes">
+        <!-- Dynamic Content will be here -->
+    </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document
-            .getElementById("generateButton")
-            .addEventListener("click", function () {
-                generateMessages(
-                    "bundleBoxes",
-                    "https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt"
-                );
-            });
-        document
-            .getElementById("supportButton")
-            .addEventListener("click", function () {
-                generateMessages(
-                    "supportBoxes",
-                    "https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt"
-                );
-            });
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document
+                .getElementById("generateButton")
+                .addEventListener("click", function () {
+                    generateMessages(
+                        "bundleBoxes",
+                        "https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt"
+                    );
+                });
+            document
+                .getElementById("supportButton")
+                .addEventListener("click", function () {
+                    generateMessages(
+                        "supportBoxes",
+                        "https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt"
+                    );
+                });
 
-        generateMessages(
-            "bundleBoxes",
-            "https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt"
-        );
-        generateMessages(
-            "supportBoxes",
-            "https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt"
-        );
-    });
-
-    function copyToClipboard(event, elementId) {
-        const textToCopy = document.getElementById(elementId).textContent;
-        navigator.clipboard.writeText(textToCopy);
-
-        const confirmation = document.createElement("div");
-        confirmation.textContent = "Copied 🫡";
-        confirmation.className = "copy-confirmation";
-        confirmation.style.left = `${event.clientX}px`;
-        confirmation.style.top = `${event.clientY}px`;
-        document.body.appendChild(confirmation);
-
-        setTimeout(() => {
-            document.body.removeChild(confirmation);
-        }, 1500);
-    }
-
-    async function fetchSentences(url) {
-        try {
-            const response = await fetch(url);
-            const text = await response.text();
-            return text.split("^").filter(sentence => sentence.trim().length > 0);
-        } catch (error) {
-            console.error("Error fetching sentences:", error);
-        }
-        return [];
-    }
-
-    function generateMessages(boxType, url) {
-        fetchSentences(url).then((sentences) => {
-            const container = document.getElementById(boxType);
-            container.innerHTML = ""; // Clear any previous content
-            const messageCount = boxType === "bundleBoxes" ? 3 : 3; // Depending on the boxType, we show a certain number of messages.
-
-            for (let i = 0; i < messageCount; i++) {
-                const box = document.createElement("div");
-                box.className =
-                    boxType === "bundleBoxes" ? "output-box" : "support-output-box";
-                const randomIndex = Math.floor(Math.random() * sentences.length);
-                box.textContent = sentences[randomIndex];
-
-                const copyButton = document.createElement("button");
-                copyButton.className = "copy-button";
-                copyButton.textContent = "Copy";
-                copyButton.onclick = (event) => {
-                    copyToClipboard(event, box.id);
-                };
-                box.id = `outputBox${Date.now()}${i}`; // Give each box a unique ID
-                box.appendChild(copyButton);
-                container.appendChild(box);
-            }
+            // Initial fetching on page load
+            generateMessages(
+                "bundleBoxes",
+                "https://raw.githubusercontent.com/Raresh777/TextAutomator/main/bld.txt"
+            );
+            generateMessages(
+                "supportBoxes",
+                "https://raw.githubusercontent.com/Raresh777/TextAutomator/main/supp.txt"
+            );
         });
-    }
-</script>
+
+        function copyToClipboard(event, elementId) {
+            const textToCopy = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(textToCopy);
+
+            const confirmation = document.createElement("div");
+            confirmation.textContent = "Copied 🫡";
+            confirmation.className = "copy-confirmation";
+            confirmation.style.left = `${event.clientX}px`;
+            confirmation.style.top = `${event.clientY}px`;
+
+            document.body.appendChild(confirmation);
+
+            setTimeout(() => {
+                document.body.removeChild(confirmation);
+            }, 2000);
+        }
+
+        async function generateMessages(containerId, url) {
+            clearPreviousBoxes(containerId);
+            let sentences = await fetchSentences(url);
+
+            // This part ensures you're selecting 3 unique random sentences.
+            for (let i = 1; i <= 3; i++) {
+                let randomIndex = Math.floor(Math.random() * sentences.length);
+                let selectedSentence = sentences[randomIndex];
+                sentences.splice(randomIndex, 1); // Remove the selected sentence to prevent repetition
+                await generateBox(i, selectedSentence, containerId);
+            }
+        }
+
+        async function fetchSentences(url) {
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+
+                // This will split the text by the '^' character and remove any empty or whitespace-only strings.
+                return text.split("^").filter(sentence => sentence.trim().length > 0);
+            } catch (error) {
+                console.error("Error loading sentences:", error);
+                return [];
+            }
+        }
+
+        async function generateBox(index, sentence, containerId) {
+            const outputElement = document.createElement("div");
+            outputElement.className =
+                containerId === "bundleBoxes" ? "output-box" : "support-output-box";
+
+            const contentElement = document.createElement("div");
+            contentElement.id = `output${containerId}${index}`;
+            contentElement.innerHTML = sentence;
+            outputElement.appendChild(contentElement);
+
+            const copyButton = document.createElement("button");
+            copyButton.className = "copy-button";
+            copyButton.innerHTML = "Copy Text";
+            copyButton.onclick = function (event) {
+                copyToClipboard(event, `output${containerId}${index}`);
+            };
+            outputElement.appendChild(copyButton);
+
+            document.getElementById(containerId).appendChild(outputElement);
+        }
+
+        function clearPreviousBoxes(containerId) {
+            const container = document.getElementById(containerId);
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+        }
+    </script>
 </body>
+
 </html>
