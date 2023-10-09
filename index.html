@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rares+</title>
     <style>
-        /* Add scrollbar styles */
         ::-webkit-scrollbar {
             width: 10px;
         }
@@ -118,16 +117,20 @@
         <button id="generateButton">Bundle</button>
     </div>
     <div class="output-container" id="bundleBoxes">
-        <!-- Dynamic Content will be here -->
     </div>
     <div class="button-container">
         <button id="supportButton">Support Message</button>
     </div>
     <div class="output-container" id="supportBoxes">
-        <!-- Dynamic Content will be here -->
     </div>
 
     <script>
+        // Global state for used sentences
+        const usedSentences = {
+            bundleBoxes: [],
+            supportBoxes: []
+        };
+
         document.addEventListener("DOMContentLoaded", function () {
             document
                 .getElementById("generateButton")
@@ -177,13 +180,20 @@
         async function generateMessages(containerId, url) {
             clearPreviousBoxes(containerId);
             let sentences = await fetchSentences(url);
-
+            
+            sentences = sentences.filter(sentence => !usedSentences[containerId].includes(sentence));
+            
             for (let i = 1; i <= 3; i++) {
+                if (sentences.length === 0) {
+                    usedSentences[containerId] = [];
+                    sentences = await fetchSentences(url);
+                }
+
                 let randomIndex = Math.floor(Math.random() * sentences.length);
                 let selectedSentence = sentences[randomIndex];
-                sentences.splice(randomIndex, 1); 
                 
-                console.log("Selected:", selectedSentence);
+                usedSentences[containerId].push(selectedSentence);
+                sentences.splice(randomIndex, 1);
 
                 await generateBox(i, selectedSentence, containerId);
             }
@@ -195,8 +205,6 @@
                 const text = await response.text();
 
                 const sentences = text.split("^").filter(sentence => sentence.trim().length > 0);
-
-                console.log("Fetched sentences:", sentences);
 
                 return sentences;
             } catch (error) {
