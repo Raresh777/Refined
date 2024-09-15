@@ -6,8 +6,8 @@
   <title>Leads Summary</title>
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #000;
+      font-family: 'Arial', sans-serif;
+      background-color: rgba(0, 0, 0, 0.7);
       color: #00FF00;
       text-align: center;
       padding: 40px;
@@ -22,43 +22,40 @@
 
     input[type="file"], input[type="date"], button {
       color: #00FF00;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(0, 0, 0, 0.3);
       border: 2px solid #00FF00;
       padding: 12px;
       border-radius: 8px;
       margin: 10px;
       font-size: 18px;
-      box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.2);
       transition: background-color 0.3s ease;
     }
 
-    button:hover {
+    button:hover, input:hover {
       background-color: rgba(0, 255, 0, 0.1);
     }
 
     #results {
       margin-top: 30px;
       padding: 20px;
-      background-color: rgba(0, 0, 0, 0.6);
+      background-color: rgba(0, 0, 0, 0.3);
       border-radius: 12px;
       width: 80%;
       display: inline-block;
       text-align: left;
-      box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.2);
     }
 
-    .result-section {
-      margin-bottom: 20px;
+    h2, h3 {
+      color: #00FF00;
     }
 
     ul {
       list-style: none;
-      padding-left: 0;
+      padding: 0;
     }
 
     li {
       font-size: 18px;
-      color: #00FF00;
     }
 
     #buttons-container {
@@ -98,6 +95,7 @@
   <!-- Results Section -->
   <div id="results" style="display:none;">
     <h2>Results for <span id="selectedDate"></span></h2>
+
     <div class="result-section">
       <h3>Total Leads: <span id="totalLeads"></span></h3>
     </div>
@@ -116,7 +114,9 @@
   <script>
     let leadsData = [];
 
-    // Function to handle the CSV upload and parse the data
+    // Chart instances
+    let locationChart, languageChart;
+
     function loadCSV(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
@@ -150,7 +150,7 @@
       
       reader.readAsText(file);
     }
-    // Function to process and display leads data
+
     function processLeads() {
       const selectedDate = document.getElementById('datePicker').value;
       const resultsDiv = document.getElementById('results');
@@ -186,21 +186,23 @@
         cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
 
-      // Prepare chart data
-      updateCharts(locationCount, cityLanguageCount);
+      // Update location chart
+      updateLocationChart(locationCount);
 
-      // Show the results section
+      // Update language chart per city
+      updateLanguageChart(cityLanguageCount);
+
+      // Finally, display the results section
       resultsDiv.style.display = 'block';
     }
-    // Function to update charts based on processed data
-    function updateCharts(locationCount, cityLanguageCount) {
-      // Destroy existing charts if they exist
-      if (locationChart) locationChart.destroy();
-      if (languageChart) languageChart.destroy();
 
-      // Create the 3D bar chart for "Leads by Location"
+    function updateLocationChart(locationCount) {
       const locationLabels = Object.keys(locationCount);
       const locationData = Object.values(locationCount);
+
+      if (locationChart) {
+        locationChart.destroy();
+      }
 
       const ctx1 = document.getElementById('locationChart').getContext('2d');
       locationChart = new Chart(ctx1, {
@@ -244,8 +246,9 @@
           }
         }
       });
+    }
 
-      // Create horizontal bar chart for "Leads by First Language per City"
+    function updateLanguageChart(cityLanguageCount) {
       const cityLanguageLabels = [];
       const cityLanguageData = [];
 
@@ -255,6 +258,10 @@
           cityLanguageData.push(count);
         });
       });
+
+      if (languageChart) {
+        languageChart.destroy();
+      }
 
       const ctx2 = document.getElementById('languageChart').getContext('2d');
       languageChart = new Chart(ctx2, {
@@ -271,7 +278,6 @@
           }]
         },
         options: {
-          indexAxis: 'y',
           responsive: true,
           plugins: {
             legend: {
@@ -300,10 +306,9 @@
         }
       });
     }
-  </script>
-    // Attach the file reader to the file input change event
-    document.getElementById('csvFileInput').addEventListener('change', loadCSV);
 
+    // Attach file reader to file input change event
+    document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 
 </body>
