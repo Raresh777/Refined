@@ -12,13 +12,13 @@
       text-align: center;
       padding: 40px;
     }
-    
+
     h1 {
       color: #ff6600;
       margin-bottom: 30px;
       font-size: 42px;
     }
-    
+
     input[type="file"], input[type="date"], button {
       color: #f0f0f0;
       background-color: #333;
@@ -28,7 +28,7 @@
       margin: 10px;
       font-size: 18px;
     }
-    
+
     button {
       cursor: pointer;
       border: 2px solid #ff6600;
@@ -39,7 +39,7 @@
     button:hover {
       background-color: #e65c00;
     }
-    
+
     #results {
       margin-top: 30px;
       padding: 20px;
@@ -49,7 +49,7 @@
       display: inline-block;
       text-align: left;
     }
-    
+
     .result-section {
       margin-bottom: 20px;
     }
@@ -68,14 +68,39 @@
       justify-content: center;
     }
 
+    /* Progress bar for total leads */
+    .progress-bar {
+      height: 30px;
+      width: 100%;
+      background-color: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress {
+      height: 100%;
+      background-color: #ff6600;
+      border-radius: 10px;
+      transition: width 0.5s;
+    }
+
     .below-target {
-      color: red;
+      background-color: red;
     }
 
     .above-target {
-      color: green;
+      background-color: green;
+    }
+
+    /* Chart container */
+    .chart-container {
+      width: 100%;
+      margin: 30px 0;
     }
   </style>
+  <!-- Include Chart.js for graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -98,22 +123,29 @@
 
     <div class="result-section">
       <h3>Total Leads: <span id="totalLeads"></span></h3>
-      <h3>Target Leads: <span id="targetLeads"></span></h3> <!-- Display the target leads here -->
+      <!-- Progress bar -->
+      <div class="progress-bar">
+        <div class="progress" id="leadProgress"></div>
+      </div>
+      <h3>Target Leads: <span id="targetLeads"></span></h3>
     </div>
 
     <div class="result-section">
       <h3>Leads by Location</h3>
-      <ul id="locationBreakdown"></ul>
+      <canvas id="locationChart"></canvas>
     </div>
 
     <div class="result-section">
       <h3>Leads by First Language per City</h3>
-      <ul id="cityLanguageBreakdown"></ul>
+      <canvas id="languageChart"></canvas>
     </div>
   </div>
 
   <script>
     let leadsData = [];
+
+    // Chart instances
+    let locationChart, languageChart;
 
     function loadCSV(event) {
       const file = event.target.files[0];
@@ -161,7 +193,6 @@
       ];
 
       const target = targetLeadsData.find(range => {
-        // Compare dates in M/D/YYYY format
         const targetStartDate = new Date(range.start);
         const targetEndDate = new Date(range.end);
         const selectedDate = new Date(date);
@@ -185,81 +216,119 @@
       // Keep the date in M/D/YYYY format
       const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
 
-      // Filter leads by selected date (including all occurrences of that date)
+      // Filter leads by selected date
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
-
-      // Count total leads (based on how many times the date appears)
       const totalLeadsCount = leadsForSelectedDate.length;
-      document.getElementById('totalLeads').textContent = totalLeadsCount;
 
-      // Get the target leads for the selected date
+      // Get target leads and display progress bar
       const targetLeads = getTargetLeads(formattedDate);
-      if (targetLeads !== null) {
-        document.getElementById('targetLeads').textContent = targetLeads;
-
-        // Change the color of the total leads based on whether it's below or above target
-        const totalLeadsElem = document.getElementById('totalLeads');
-        if (totalLeadsCount < targetLeads) {
-          totalLeadsElem.classList.add('below-target');
-          totalLeadsElem.classList.remove('above-target');
-        } else {
-          totalLeadsElem.classList.add('above-target');
-          totalLeadsElem.classList.remove('below-target');
-        }
+      document.getElementById('targetLeads').textContent = targetLeads || 'No target';
+      const leadProgress = document.getElementById('leadProgress');
+      const progressPercent = totalLeadsCount / (targetLeads || totalLeadsCount) * 100;
+      leadProgress.style.width = progressPercent + '%';
+      leadProgress.classList.remove('below-target', 'above-target');
+      if (totalLeadsCount < targetLeads) {
+        leadProgress.classList.add('below-target');
       } else {
-        document.getElementById('targetLeads').textContent = 'No target';
+        leadProgress.classList.add('above-target');
       }
 
-      // Count leads by location
+      document.getElementById('totalLeads').textContent = totalLeadsCount;
+
+      // Process leads by location
       const locationCount = {};
-      const cityLanguageCount = {}; // To track languages per city
+      const cityLanguageCount = {};
 
       leadsForSelectedDate.forEach(lead => {
-        // Count locations
         locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
 
-        // Count languages per city
         if (!cityLanguageCount[lead.location]) {
           cityLanguageCount[lead.location] = {};
         }
         cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
 
-      // Display breakdown by location
-      const locationBreakdown = document.getElementById('locationBreakdown');
-      locationBreakdown.innerHTML = ''; // Clear previous results
-      for (const [location, count] of Object.entries(locationCount)) {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${location}: ${count}`;
-        locationBreakdown.appendChild(listItem);
+   // Update location chart
+      const locationLabels = Object.keys(locationCount);
+      const locationData = Object.values(locationCount);
+
+      if (locationChart) {
+        locationChart.destroy();
       }
 
-      // Display languages per city
-      const cityLanguageBreakdown = document.getElementById('cityLanguageBreakdown');
-      cityLanguageBreakdown.innerHTML = ''; // Clear previous results
-      for (const [city, languages] of Object.entries(cityLanguageCount)) {
-        const cityItem = document.createElement('li');
-        cityItem.innerHTML = `<strong>${city}</strong>:`;
-        const languageList = document.createElement('ul');
-
-             for (const [language, count] of Object.entries(languages)) {
-          const languageItem = document.createElement('li');
-          languageItem.textContent = `${language}: ${count}`;
-          languageList.appendChild(languageItem);
+      const ctx1 = document.getElementById('locationChart').getContext('2d');
+      locationChart = new Chart(ctx1, {
+        type: 'pie',
+        data: {
+          labels: locationLabels,
+          datasets: [{
+            label: 'Leads by Location',
+            data: locationData,
+            backgroundColor: ['#ff6666', '#66b3ff', '#99ff99', '#ffcc66', '#ff66ff'],
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            }
+          }
         }
+      });
 
-        cityItem.appendChild(languageList);
-        cityLanguageBreakdown.appendChild(cityItem);
+      // Update language chart per city
+      const cityLanguageLabels = [];
+      const cityLanguageData = [];
+
+      Object.entries(cityLanguageCount).forEach(([city, languages]) => {
+        Object.entries(languages).forEach(([language, count]) => {
+          cityLanguageLabels.push(`${city} - ${language}`);
+          cityLanguageData.push(count);
+        });
+      });
+
+      if (languageChart) {
+        languageChart.destroy();
       }
 
-      // Finally, show the results section after processing everything
+      const ctx2 = document.getElementById('languageChart').getContext('2d');
+      languageChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: cityLanguageLabels,
+          datasets: [{
+            label: 'Leads by Language per City',
+            data: cityLanguageData,
+            backgroundColor: '#ff6600',
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false,
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false,
+                maxRotation: 90,
+                minRotation: 45
+              }
+            }
+          }
+        }
+      });
+
+      // Finally, display the results section
       resultsDiv.style.display = 'block';
     }
 
-    // Attach the file reader to the file input change event
+    // Attach file reader to file input change event
     document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 
 </body>
 </html>
-
