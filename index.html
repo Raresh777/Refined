@@ -124,6 +124,8 @@
         const lines = text.split('\n');
         const headers = lines[0].split(',');
 
+        console.log("Headers:", headers);  // Debug: Check headers
+
         // Indices for the columns we need
         const dateIdx = headers.indexOf('Submission date');
         const emailIdx = headers.indexOf('Email');
@@ -143,7 +145,7 @@
           };
         });
 
-        console.log(leadsData); // Debugging to verify data is being read correctly
+        console.log("Parsed Leads Data:", leadsData); // Debug: Check parsed data
       };
       
       reader.readAsText(file);
@@ -180,7 +182,11 @@
       // Format selected date to MM/DD/YYYY
       const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
 
+      console.log("Selected Date (formatted):", formattedDate); // Debug: Check selected date
+
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
+      console.log("Filtered Leads for Selected Date:", leadsForSelectedDate); // Debug: Check leads for selected date
+
       const actualLeadsCount = leadsForSelectedDate.length;
       const targetLeads = getTargetLeads(formattedDate);
 
@@ -226,7 +232,7 @@
       }
 
       const cityLanguageBreakdown = document.getElementById('cityLanguageBreakdown');
-      cityLanguageBreakdown.innerHTML = '';
+            cityLanguageBreakdown.innerHTML = '';
       for (const [city, languages] of Object.entries(cityLanguageCount)) {
         const cityItem = document.createElement('li');
         cityItem.innerHTML = `<strong>${city}</strong>:`;
@@ -242,10 +248,10 @@
         cityLanguageBreakdown.appendChild(cityItem);
       }
 
-      resultsDiv.style.display = 'block';
+      resultsDiv.style.display = 'block'; // Show results section after processing
     }
 
-        document.getElementById('csvFileInput').addEventListener('change', loadCSV);
+    document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 
 </body>
