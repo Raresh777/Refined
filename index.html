@@ -128,26 +128,27 @@
         const lines = text.split('\n');
         const headers = lines[0].split(',');
 
-        // Indices for the columns we need
+        // Indices for the columns we need (based on your request, date is at column D (index 3))
         const dateIdx = headers.indexOf('Submission date');
         const emailIdx = headers.indexOf('Email');
         const phoneIdx = headers.indexOf('Phone Number');
         const locationIdx = headers.indexOf('Location');
         const languageIdx = headers.indexOf('Languages');
 
+        // Extract leads data and populate leadsData array
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: fields[dateIdx],
-            email: fields[emailIdx],
-            phone: fields[phoneIdx],
-            location: fields[locationIdx],
-            language: fields[languageIdx]?.split(',')[0] || '' // Extract first language
+            date: fields[dateIdx]?.trim(), // Ensure date is trimmed and clean
+            email: fields[emailIdx]?.trim(),
+            phone: fields[phoneIdx]?.trim(),
+            location: fields[locationIdx]?.trim(),
+            language: fields[languageIdx]?.split(',')[0]?.trim() // Extract only the first language
           };
         });
 
         // Populate date selector with unique dates
-        dateOptions = new Set(leadsData.map(lead => lead.date).filter(date => date)); // Ensure we don't add empty dates
+        dateOptions = new Set(leadsData.map(lead => lead.date).filter(date => date)); // Ensure no empty dates
         populateDateSelector();
       };
       
