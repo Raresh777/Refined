@@ -135,7 +135,7 @@
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: fields[dateIdx]?.trim(), // Clean up date
+            date: new Date(fields[dateIdx]?.trim()).toISOString().split('T')[0], // Convert date to YYYY-MM-DD
             email: fields[emailIdx]?.trim(),
             phone: fields[phoneIdx]?.trim(),
             location: fields[locationIdx]?.trim(),
@@ -175,8 +175,8 @@
         return;
       }
 
-      // Format the date from YYYY-MM-DD to M/D/YYYY
-      const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
+      // Format the date from YYYY-MM-DD
+      const formattedDate = new Date(selectedDate).toISOString().split('T')[0];
 
       // Filter leads by selected date (including all occurrences of that date)
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
@@ -236,6 +236,7 @@
         const languageList = document.createElement('ul');
 
         for (const [language, count] of Object.entries(languages)) {
+         
           const languageItem = document.createElement('li');
           languageItem.textContent = `${language}: ${count}`;
           languageList.appendChild(languageItem);
@@ -255,4 +256,3 @@
 
 </body>
 </html>
-
