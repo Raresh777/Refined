@@ -98,7 +98,7 @@
 
     <div class="result-section">
       <h3>Total Leads: <span id="totalLeads"></span></h3>
-      <h3>Target Leads: <span id="targetLeads"></span></h3> <!-- Added target leads display -->
+      <h3 id="targetLeadsSection" style="display:none;">Target Leads: <span id="targetLeads"></span></h3> <!-- Display only if there's a target -->
     </div>
 
     <div class="result-section">
@@ -135,7 +135,7 @@
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: new Date(fields[dateIdx]?.trim()).toLocaleDateString('en-US'), // Use the correct date format (MM/DD/YYYY)
+            date: new Date(fields[dateIdx]?.trim()).toLocaleDateString('en-US'), // Format date to MM/DD/YYYY
             email: fields[emailIdx]?.trim(),
             phone: fields[phoneIdx]?.trim(),
             location: fields[locationIdx]?.trim(),
@@ -143,7 +143,7 @@
           };
         });
 
-        console.log(leadsData); // Debug to ensure data is parsed correctly
+        console.log(leadsData); // Debugging to verify data is being read correctly
       };
       
       reader.readAsText(file);
@@ -164,7 +164,7 @@
         return date >= range.start && date <= range.end;
       });
 
-      return target ? target.target : "No target";
+      return target ? target.target : null; // Return null if there's no target
     }
 
     function processLeads() {
@@ -177,7 +177,7 @@
         return;
       }
 
-      // Use the correct date format (MM/DD/YYYY)
+      // Format selected date to MM/DD/YYYY
       const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
 
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
@@ -185,17 +185,23 @@
       const targetLeads = getTargetLeads(formattedDate);
 
       // Display actual leads and target leads
-      document.getElementById('targetLeads').textContent = targetLeads;
-
       const totalLeadsElem = document.getElementById('totalLeads');
       totalLeadsElem.textContent = actualLeadsCount;
 
-      if (actualLeadsCount < targetLeads) {
-        totalLeadsElem.classList.add('below-target');
-        totalLeadsElem.classList.remove('above-target');
+      if (targetLeads !== null) {
+        document.getElementById('targetLeadsSection').style.display = 'block';
+        document.getElementById('targetLeads').textContent = targetLeads;
+
+        // Color the total leads red if below target, green if at/above target
+        if (actualLeadsCount < targetLeads) {
+          totalLeadsElem.classList.add('below-target');
+          totalLeadsElem.classList.remove('above-target');
+        } else {
+          totalLeadsElem.classList.add('above-target');
+          totalLeadsElem.classList.remove('below-target');
+        }
       } else {
-        totalLeadsElem.classList.add('above-target');
-        totalLeadsElem.classList.remove('below-target');
+        document.getElementById('targetLeadsSection').style.display = 'none';
       }
 
       // Count leads by location
@@ -226,7 +232,7 @@
         cityItem.innerHTML = `<strong>${city}</strong>:`;
         const languageList = document.createElement('ul');
 
-                for (const [language, count] of Object.entries(languages)) {
+        for (const [language, count] of Object.entries(languages)) {
           const languageItem = document.createElement('li');
           languageItem.textContent = `${language}: ${count}`;
           languageList.appendChild(languageItem);
@@ -239,9 +245,8 @@
       resultsDiv.style.display = 'block';
     }
 
-    document.getElementById('csvFileInput').addEventListener('change', loadCSV);
+        document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 
 </body>
 </html>
-
