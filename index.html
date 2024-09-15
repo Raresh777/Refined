@@ -26,7 +26,7 @@
       border: 1px solid #00FFFF;
       padding: 10px;
       border-radius: 10px;
-      margin: 15px;
+      margin: 10px;
       font-size: 18px;
       text-shadow: 0 0 5px #00FFFF;
       transition: 0.3s ease;
@@ -40,6 +40,8 @@
       cursor: pointer;
       border: 2px solid #00FFFF;
       box-shadow: 0 0 10px #00FFFF;
+      display: inline-block;
+      margin-right: 10px;
     }
 
     button:hover {
@@ -71,21 +73,28 @@
     li {
       font-size: 18px;
     }
+
+    #buttons-container {
+      display: flex;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
 
   <h1>Leads Summary by Date</h1>
 
-  <!-- File upload input -->
-  <input type="file" id="csvFileInput" accept=".csv" /><br>
-
-  <!-- Date Selector -->
-  <label for="dateSelector">Select Date:</label>
-  <select id="dateSelector" style="max-width: 200px;"></select><br>
+  <!-- File upload input and date selector side by side -->
+  <div id="buttons-container">
+    <input type="file" id="csvFileInput" accept=".csv" />
+    <label for="dateSelector">Select Date:</label>
+    <select id="dateSelector" style="max-width: 200px;"></select>
+  </div>
 
   <!-- Show Summary Button -->
-  <button onclick="processLeads()">Show Leads Summary</button>
+  <div id="buttons-container">
+    <button onclick="processLeads()">Show Leads Summary</button>
+  </div>
 
   <!-- Results Section -->
   <div id="results" style="display:none;">
@@ -133,12 +142,12 @@
             email: fields[emailIdx],
             phone: fields[phoneIdx],
             location: fields[locationIdx],
-            language: fields[languageIdx].split(',')[0] // Extract first language
+            language: fields[languageIdx]?.split(',')[0] || '' // Extract first language
           };
         });
 
         // Populate date selector with unique dates
-        leadsData.forEach(lead => dateOptions.add(lead.date));
+        dateOptions = new Set(leadsData.map(lead => lead.date).filter(date => date)); // Ensure we don't add empty dates
         populateDateSelector();
       };
       
@@ -149,18 +158,31 @@
       const dateSelector = document.getElementById('dateSelector');
       dateSelector.innerHTML = ''; // Clear the options
 
+      // Populate unique dates into the selector
       dateOptions.forEach(date => {
         const option = document.createElement('option');
         option.value = date;
         option.text = date;
         dateSelector.appendChild(option);
       });
+
+      if (!dateSelector.options.length) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.text = 'No valid dates found';
+        dateSelector.appendChild(option);
+      }
     }
 
     function processLeads() {
       const selectedDate = document.getElementById('dateSelector').value;
       const resultsDiv = document.getElementById('results');
       document.getElementById('selectedDate').textContent = selectedDate;
+
+      if (!selectedDate) {
+        alert('Please select a date.');
+        return;
+      }
 
       // Filter leads by selected date and ensure uniqueness using email or phone number
       const leadsForSelectedDate = leadsData.filter(
