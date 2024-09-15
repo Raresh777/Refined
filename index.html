@@ -4,74 +4,58 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Leads Summary</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: 'Orbitron', sans-serif; /* Futuristic font */
-      background-color: #121212; /* Dark background */
-      color: #00FFCC; /* Neon green text */
+      font-family: 'Arial', sans-serif;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: #f0f0f0;
       text-align: center;
       padding: 40px;
+      background: linear-gradient(130deg, rgba(30,30,60,1) 0%, rgba(50,50,90,1) 100%);
     }
-    
+
     h1 {
-      color: #00FFFF; /* Bright blue title */
-      text-shadow: 0 0 10px #00FFFF, 0 0 20px #00FFFF;
+      color: #00FFC3;
       margin-bottom: 30px;
       font-size: 42px;
+      text-shadow: 0 0 15px #00FFC3;
     }
-    
-    label, select, button, input[type="file"] {
-      color: #00FFCC;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid #00FFFF;
+
+    input[type="file"], input[type="date"], button {
+      color: #000;
+      background-color: #00FFC3;
+      border: none;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 5px;
       margin: 10px;
       font-size: 18px;
-      text-shadow: 0 0 5px #00FFFF;
-      transition: 0.3s ease;
-    }
-    
-    input[type="file"] {
       cursor: pointer;
-    }
-    
-    button {
-      cursor: pointer;
-      border: 2px solid #00FFFF;
-      box-shadow: 0 0 10px #00FFFF;
-      display: inline-block;
-      margin-right: 10px;
     }
 
     button:hover {
-      background-color: #00FFFF;
-      color: #121212;
-      box-shadow: 0 0 20px #00FFFF, 0 0 30px #00FFFF;
+      background-color: #00CC99;
     }
-    
+
     #results {
       margin-top: 30px;
       padding: 20px;
-      background-color: #222222;
+      background-color: rgba(255, 255, 255, 0.1);
       border-radius: 10px;
-      box-shadow: 0 0 20px #00FFFF;
-      display: inline-block;
-      text-align: left;
       width: 80%;
-    }
-    
-    .result-section {
-      margin-bottom: 20px;
-    }
-
-    ul {
-      list-style: none;
-      padding-left: 0;
+      margin: auto;
+      text-align: left;
+      box-shadow: 0 0 20px rgba(0, 255, 195, 0.8);
     }
 
-    li {
-      font-size: 18px;
+    canvas {
+      max-width: 100%;
+      margin-top: 20px;
+    }
+
+    .result-text {
+      font-size: 20px;
+      font-weight: bold;
     }
 
     #buttons-container {
@@ -84,11 +68,10 @@
 
   <h1>Leads Summary by Date</h1>
 
-  <!-- File upload input and date selector side by side -->
+  <!-- File upload input and calendar date picker -->
   <div id="buttons-container">
     <input type="file" id="csvFileInput" accept=".csv" />
-    <label for="dateSelector">Select Date:</label>
-    <select id="dateSelector" style="max-width: 200px;"></select>
+    <input type="date" id="datePicker">
   </div>
 
   <!-- Show Summary Button -->
@@ -99,25 +82,49 @@
   <!-- Results Section -->
   <div id="results" style="display:none;">
     <h2>Results for <span id="selectedDate"></span></h2>
-
-    <div class="result-section">
-      <h3>Total Leads: <span id="totalLeads"></span></h3>
-    </div>
-
-    <div class="result-section">
-      <h3>Leads by Location</h3>
-      <ul id="locationBreakdown"></ul>
-    </div>
-
-    <div class="result-section">
-      <h3>Leads by First Language</h3>
-      <ul id="languageBreakdown"></ul>
-    </div>
+    <p class="result-text" id="totalLeads"></p>
+    <canvas id="cityChart"></canvas> <!-- City Bar Chart -->
+    <canvas id="languageChart"></canvas> <!-- Language Bar Chart -->
   </div>
 
   <script>
     let leadsData = [];
-    let dateOptions = new Set();
+    let cityChartInstance = null;
+    let languageChartInstance = null;
+
+    // Function to calculate target leads based on the selected date
+    function getTargetLeads(date) {
+      const startDate1 = new Date("2024-09-16");
+      const endDate1 = new Date("2024-10-13");
+      const startDate2 = new Date("2024-10-14");
+      const endDate2 = new Date("2024-10-17");
+      const startDate3 = new Date("2024-10-18");
+      const endDate3 = new Date("2024-10-20");
+      const startDate4 = new Date("2024-10-21");
+      const endDate4 = new Date("2024-11-10");
+      const startDate5 = new Date("2024-11-11");
+      const endDate5 = new Date("2024-11-17");
+      const startDate6 = new Date("2024-11-18");
+      const endDate6 = new Date("2024-12-04");
+
+      const currentDate = new Date(date);
+
+      if (currentDate >= startDate1 && currentDate <= endDate1) {
+        return 213;
+      } else if (currentDate >= startDate2 && currentDate <= endDate2) {
+        return 221;
+      } else if (currentDate >= startDate3 && currentDate <= endDate3) {
+        return 274;
+      } else if (currentDate >= startDate4 && currentDate <= endDate4) {
+        return 274;
+      } else if (currentDate >= startDate5 && currentDate <= endDate5) {
+        return 145;
+      } else if (currentDate >= startDate6 && currentDate <= endDate6) {
+        return 92;
+      } else {
+        return "No target";
+      }
+    }
 
     function loadCSV(event) {
       const file = event.target.files[0];
@@ -128,55 +135,31 @@
         const lines = text.split('\n');
         const headers = lines[0].split(',');
 
-        // Indices for the columns we need (based on your request, date is at column D (index 3))
+        // Indices for the columns we need
         const dateIdx = headers.indexOf('Submission date');
         const emailIdx = headers.indexOf('Email');
         const phoneIdx = headers.indexOf('Phone Number');
         const locationIdx = headers.indexOf('Location');
         const languageIdx = headers.indexOf('Languages');
 
-        // Extract leads data and populate leadsData array
+        // Extract leads data
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: fields[dateIdx]?.trim(), // Ensure date is trimmed and clean
+            date: fields[dateIdx]?.trim(),
             email: fields[emailIdx]?.trim(),
             phone: fields[phoneIdx]?.trim(),
             location: fields[locationIdx]?.trim(),
-            language: fields[languageIdx]?.split(',')[0]?.trim() // Extract only the first language
+            language: fields[languageIdx]?.split(',')[0]?.trim()
           };
         });
-
-        // Populate date selector with unique dates
-        dateOptions = new Set(leadsData.map(lead => lead.date).filter(date => date)); // Ensure no empty dates
-        populateDateSelector();
       };
       
       reader.readAsText(file);
     }
 
-    function populateDateSelector() {
-      const dateSelector = document.getElementById('dateSelector');
-      dateSelector.innerHTML = ''; // Clear the options
-
-      // Populate unique dates into the selector
-      dateOptions.forEach(date => {
-        const option = document.createElement('option');
-        option.value = date;
-        option.text = date;
-        dateSelector.appendChild(option);
-      });
-
-      if (!dateSelector.options.length) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.text = 'No valid dates found';
-        dateSelector.appendChild(option);
-      }
-    }
-
     function processLeads() {
-      const selectedDate = document.getElementById('dateSelector').value;
+      const selectedDate = document.getElementById('datePicker').value;
       const resultsDiv = document.getElementById('results');
       document.getElementById('selectedDate').textContent = selectedDate;
 
@@ -185,45 +168,101 @@
         return;
       }
 
-      // Filter leads by selected date and ensure uniqueness using email or phone number
-      const leadsForSelectedDate = leadsData.filter(
-        (lead, index, self) => 
-          lead.date === selectedDate &&
-          index === self.findIndex(l => l.email === lead.email || l.phone === lead.phone)
-      );
+      const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
 
-      // Count total leads
-      document.getElementById('totalLeads').textContent = leadsForSelectedDate.length;
+      // Filter leads by selected date (including all occurrences of that date)
+      const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
 
-      // Count leads by location
+      // Calculate target leads
+      const targetLeads = getTargetLeads(formattedDate);
+
+      // Compare actual vs target leads and set text color
+      const totalLeads = leadsForSelectedDate.length;
+      const totalLeadsText = document.getElementById('totalLeads');
+
+      if (totalLeads < targetLeads) {
+        totalLeadsText.style.color = 'red';
+        totalLeadsText.innerText = `Actual Leads: ${totalLeads} (Target: ${targetLeads}) - Below Target`;
+      } else {
+        totalLeadsText.style.color = 'green';
+        totalLeadsText.innerText = `Actual Leads: ${totalLeads} (Target: ${targetLeads}) - Met or Exceeded Target`;
+      }
+
+      // Count leads by location and language
       const locationCount = {};
+      const cityLanguageCount = {};
+
       leadsForSelectedDate.forEach(lead => {
         locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
+
+        if (!cityLanguageCount[lead.location]) {
+          cityLanguageCount[lead.location] = {};
+        }
+        cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
-
-      const locationBreakdown = document.getElementById('locationBreakdown');
-      locationBreakdown.innerHTML = ''; // Clear previous results
-      for (const [location, count] of Object.entries(locationCount)) {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${location}: ${count}`;
-        locationBreakdown.appendChild(listItem);
-      }
-
-      // Count leads by first language
-      const languageCount = {};
-      leadsForSelectedDate.forEach(lead => {
-        languageCount[lead.language] = (languageCount[lead.language] || 0) + 1;
-      });
-
-      const languageBreakdown = document.getElementById('languageBreakdown');
-      languageBreakdown.innerHTML = ''; // Clear previous results
-      for (const [language, count] of Object.entries(languageCount)) {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${language}: ${count}`;
-        languageBreakdown.appendChild(listItem);
-      }
-
+      // Render bar chart for city and breakdown for languages by city
+      renderCityChart(locationCount, cityLanguageCount);
       resultsDiv.style.display = 'block';
+    }
+
+    function renderCityChart(locationCount, cityLanguageCount) {
+      const ctxCity = document.getElementById('cityChart').getContext('2d');
+      
+      if (cityChartInstance) {
+        cityChartInstance.destroy();
+      }
+
+      cityChartInstance = new Chart(ctxCity, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(locationCount),
+          datasets: [{
+            label: 'Leads by City',
+            data: Object.values(locationCount),
+            backgroundColor: '#00FFC3'
+          }]
+        },
+        options: {
+          onClick: function(evt, item) {
+            if (item.length > 0) {
+              const city = item[0].element.$context.raw.label;
+              renderLanguageChart(city, cityLanguageCount[city]);
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function renderLanguageChart(city, languageData) {
+      const ctxLanguage = document.getElementById('languageChart').getContext('2d');
+
+      if (languageChartInstance) {
+        languageChartInstance.destroy();
+      }
+
+      languageChartInstance = new Chart(ctxLanguage, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(languageData),
+          datasets: [{
+            label: `Languages in ${city}`,
+             data: Object.values(languageData),
+            backgroundColor: '#00FFC3'
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
     }
 
     document.getElementById('csvFileInput').addEventListener('change', loadCSV);
