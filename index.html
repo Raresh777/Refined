@@ -7,43 +7,44 @@
   <style>
     body {
       font-family: 'Roboto', sans-serif;
-      background-color: #ffffff;
-      color: #002c6b;
+      background-color: #000;
+      color: #00FF00;
       text-align: center;
       padding: 40px;
       font-size: 18px;
     }
 
     h1 {
-      color: #002c6b;
+      color: #00FF00;
       margin-bottom: 30px;
       font-size: 42px;
     }
 
     input[type="file"], input[type="date"], button {
-      color: #ffffff;
-      background-color: #002c6b;
-      border: none;
+      color: #00FF00;
+      background-color: rgba(0, 0, 0, 0.5);
+      border: 2px solid #00FF00;
       padding: 12px;
       border-radius: 8px;
       margin: 10px;
       font-size: 18px;
-      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.2);
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
-      background-color: #0047ab;
+      background-color: rgba(0, 255, 0, 0.1);
     }
 
     #results {
       margin-top: 30px;
       padding: 20px;
-      background-color: rgba(255, 255, 255, 0.9);
+      background-color: rgba(0, 0, 0, 0.6);
       border-radius: 12px;
       width: 80%;
       display: inline-block;
       text-align: left;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.2);
     }
 
     .result-section {
@@ -57,6 +58,7 @@
 
     li {
       font-size: 18px;
+      color: #00FF00;
     }
 
     #buttons-container {
@@ -64,10 +66,15 @@
       justify-content: center;
     }
 
-    /* Chart container */
     .chart-container {
       width: 100%;
       margin: 30px 0;
+    }
+
+    canvas {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.2);
     }
   </style>
   <!-- Include Chart.js for graphs -->
@@ -177,7 +184,7 @@
         cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
 
-          // Update location chart
+            // Update location chart (using radar chart for a futuristic look)
       const locationLabels = Object.keys(locationCount);
       const locationData = Object.values(locationCount);
 
@@ -187,26 +194,44 @@
 
       const ctx1 = document.getElementById('locationChart').getContext('2d');
       locationChart = new Chart(ctx1, {
-        type: 'pie',
+        type: 'radar',
         data: {
           labels: locationLabels,
           datasets: [{
             label: 'Leads by Location',
             data: locationData,
-            backgroundColor: ['#ff6666', '#66b3ff', '#99ff99', '#ffcc66', '#ff66ff'],
+            backgroundColor: 'rgba(0, 255, 0, 0.2)',
+            borderColor: '#00FF00',
+            pointBackgroundColor: '#00FF00',
           }]
         },
         options: {
           responsive: true,
+          scales: {
+            r: {
+              grid: {
+                color: '#00FF00'
+              },
+              angleLines: {
+                color: '#00FF00'
+              },
+              pointLabels: {
+                color: '#00FF00'
+              }
+            }
+          },
           plugins: {
             legend: {
               position: 'bottom',
+              labels: {
+                color: '#00FF00'
+              }
             }
           }
         }
       });
 
-      // Update language chart per city
+      // Update language chart (using line chart for smooth trend)
       const cityLanguageLabels = [];
       const cityLanguageData = [];
 
@@ -223,13 +248,16 @@
 
       const ctx2 = document.getElementById('languageChart').getContext('2d');
       languageChart = new Chart(ctx2, {
-        type: 'bar',
+        type: 'line',
         data: {
           labels: cityLanguageLabels,
           datasets: [{
             label: 'Leads by Language per City',
             data: cityLanguageData,
-            backgroundColor: '#ff6600',
+            backgroundColor: 'rgba(0, 255, 0, 0.1)',
+            borderColor: '#00FF00',
+            pointBackgroundColor: '#00FF00',
+            tension: 0.4, // Smooth lines
           }]
         },
         options: {
@@ -242,9 +270,15 @@
           scales: {
             x: {
               ticks: {
-                autoSkip: false,
-                maxRotation: 90,
-                minRotation: 45
+                color: '#00FF00'
+              }
+            },
+            y: {
+              ticks: {
+                color: '#00FF00'
+              },
+              grid: {
+                color: '#00FF00'
               }
             }
           }
