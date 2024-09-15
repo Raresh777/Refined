@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Leads Summary</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js for the charts -->
   <style>
     body {
       font-family: 'Orbitron', sans-serif;
@@ -86,7 +86,6 @@
     <canvas id="cityChart"></canvas> <!-- City Bar Chart -->
     <canvas id="languageChart"></canvas> <!-- Language Bar Chart -->
   </div>
-
   <script>
     let leadsData = [];
     let cityChartInstance = null;
@@ -237,7 +236,6 @@
         }
       });
     }
-
     function renderLanguageChart(city, languageData) {
       const ctxLanguage = document.getElementById('languageChart').getContext('2d');
 
@@ -250,7 +248,6 @@
         data: {
           labels: Object.keys(languageData),
           datasets: [{
-            label: &#8203;:contentReference[oaicite:0]{index=0}&#8203;
             label: `Languages in ${city}`,
             data: Object.values(languageData),
             backgroundColor: '#00FFC3'
