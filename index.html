@@ -7,24 +7,24 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js for the charts -->
   <style>
     body {
-      font-family: 'Orbitron', sans-serif;
-      background-color: rgba(0, 0, 0, 0.85);
+      font-family: 'Arial', sans-serif;
+      background-color: rgba(0, 0, 0, 0.95);
       color: #f0f0f0;
       text-align: center;
       padding: 40px;
-      background: linear-gradient(130deg, rgba(30,30,60,1) 0%, rgba(50,50,90,1) 100%);
+      background: linear-gradient(130deg, rgba(20,20,50,1) 0%, rgba(40,40,80,1) 100%);
     }
 
     h1 {
-      color: #00FFC3;
+      color: #00FFB2;
       margin-bottom: 30px;
       font-size: 42px;
-      text-shadow: 0 0 15px #00FFC3;
+      text-shadow: 0 0 10px #00FFB2;
     }
 
     input[type="file"], input[type="date"], button {
-      color: #000;
-      background-color: #00FFC3;
+      color: #fff;
+      background-color: #333;
       border: none;
       padding: 10px;
       border-radius: 5px;
@@ -34,7 +34,7 @@
     }
 
     button:hover {
-      background-color: #00CC99;
+      background-color: #555;
     }
 
     #results {
@@ -45,7 +45,7 @@
       width: 80%;
       margin: auto;
       text-align: left;
-      box-shadow: 0 0 20px rgba(0, 255, 195, 0.8);
+      box-shadow: 0 0 15px rgba(0, 255, 195, 0.6);
     }
 
     canvas {
@@ -68,30 +68,26 @@
 
   <h1>Leads Summary by Date</h1>
 
-  <!-- File upload input and calendar date picker -->
   <div id="buttons-container">
     <input type="file" id="csvFileInput" accept=".csv" />
     <input type="date" id="datePicker">
   </div>
 
-  <!-- Show Summary Button -->
   <div id="buttons-container">
     <button onclick="processLeads()">Show Leads Summary</button>
   </div>
 
-  <!-- Results Section -->
   <div id="results" style="display:none;">
     <h2>Results for <span id="selectedDate"></span></h2>
     <p class="result-text" id="totalLeads"></p>
-    <canvas id="cityChart"></canvas> <!-- City Bar Chart -->
-    <canvas id="languageChart"></canvas> <!-- Language Bar Chart -->
+    <canvas id="cityChart"></canvas> 
+    <canvas id="languageChart"></canvas> 
   </div>
   <script>
     let leadsData = [];
     let cityChartInstance = null;
     let languageChartInstance = null;
 
-    // Function to calculate target leads based on the selected date
     function getTargetLeads(date) {
       const startDate1 = new Date("2024-09-16");
       const endDate1 = new Date("2024-10-13");
@@ -134,14 +130,12 @@
         const lines = text.split('\\n');
         const headers = lines[0].split(',');
 
-        // Indices for the columns we need
         const dateIdx = headers.indexOf('Submission date');
         const emailIdx = headers.indexOf('Email');
         const phoneIdx = headers.indexOf('Phone Number');
         const locationIdx = headers.indexOf('Location');
         const languageIdx = headers.indexOf('Languages');
 
-        // Extract leads data
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
@@ -169,12 +163,10 @@
 
       const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
 
-      // Filter leads by selected date (including all occurrences of that date)
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
-      // Calculate target leads
+
       const targetLeads = getTargetLeads(formattedDate);
 
-      // Compare actual vs target leads and set text color
       const totalLeads = leadsForSelectedDate.length;
       const totalLeadsText = document.getElementById('totalLeads');
 
@@ -185,8 +177,6 @@
         totalLeadsText.style.color = 'green';
         totalLeadsText.innerText = `Actual Leads: ${totalLeads} (Target: ${targetLeads}) - Met or Exceeded Target`;
       }
-
-      // Count leads by location and language
       const locationCount = {};
       const cityLanguageCount = {};
 
@@ -199,7 +189,6 @@
         cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
 
-      // Render bar chart for city and breakdown for languages by city
       renderCityChart(locationCount, cityLanguageCount);
       resultsDiv.style.display = 'block';
     }
@@ -218,7 +207,7 @@
           datasets: [{
             label: 'Leads by City',
             data: Object.values(locationCount),
-            backgroundColor: '#00FFC3'
+            backgroundColor: '#FFB500'
           }]
         },
         options: {
@@ -236,6 +225,7 @@
         }
       });
     }
+
     function renderLanguageChart(city, languageData) {
       const ctxLanguage = document.getElementById('languageChart').getContext('2d');
 
@@ -250,7 +240,7 @@
           datasets: [{
             label: `Languages in ${city}`,
             data: Object.values(languageData),
-            backgroundColor: '#00FFC3'
+            backgroundColor: '#FFB500'
           }]
         },
         options: {
@@ -266,5 +256,5 @@
     document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 
-</body>
+</body &#8203;:contentReference[oaicite:0]{index=0}&#8203;
 </html>
