@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSV Cleaner</title>
+  <style>
+    body {
+      background-color: #00FF00; /* Green background */
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
 
@@ -29,22 +37,26 @@
 
         // Get today's date in the correct format (assuming the format in the CSV is similar to 'DD/MM/YYYY')
         const today = new Date();
-        const formattedToday = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+        const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Remove time component
 
-        // Find the index of the column with today's date (found in row 7, which is index 6 in the array)
+        // Find the index of the column with a date in row 7 (which is index 6 in JavaScript array)
         const dateRow = lines[6];  // row 7 corresponds to index 6 in the array
         let todayIndex = -1;
-        
-        // Search for today's date in row 7
+
+        // Parse row 7 and compare with today's date
         for (let i = 5; i < dateRow.length; i++) {  // Start checking from column F (index 5)
-          if (dateRow[i].trim() === formattedToday) {
+          const dateParts = dateRow[i].split("/");  // Assuming dates are in 'DD/MM/YYYY' format
+          const dateInCSV = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);  // Convert to date object
+
+          if (dateInCSV <= todayDate) {
             todayIndex = i;
-            break;
+          } else {
+            break;  // Stop when we hit a date later than today
           }
         }
 
         if (todayIndex === -1) {
-          alert("Today's date not found in the sheet.");
+          alert("No matching date found in the sheet.");
           return;
         }
 
@@ -56,8 +68,8 @@
           }
         }
 
-        // Step 2: Remove columns from column F (index 5) to the column containing today's date
-        const cleanedRows = filteredRows.map(row => row.slice(0, 5).concat(row.slice(todayIndex)));
+        // Step 2: Remove columns from column F (index 5) to the column containing today's date (todayIndex)
+        const cleanedRows = filteredRows.map(row => row.slice(0, 5).concat(row.slice(todayIndex + 1)));
 
         // Convert back to CSV format
         const cleanedCSV = cleanedRows.map(row => row.join(",")).join("\n");
