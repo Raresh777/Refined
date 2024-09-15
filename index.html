@@ -26,7 +26,28 @@
       reader.onload = function (e) {
         const csv = e.target.result;
         const lines = csv.split("\n").map(line => line.split(","));  // Parse CSV into 2D array
+
+        // Get today's date in the correct format (assuming the format in the CSV is similar to 'DD/MM/YYYY')
+        const today = new Date();
+        const formattedToday = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+
+        // Find the index of the column with today's date (found in row 7, which is index 6 in the array)
+        const dateRow = lines[6];  // row 7 corresponds to index 6 in the array
+        let todayIndex = -1;
         
+        // Search for today's date in row 7
+        for (let i = 5; i < dateRow.length; i++) {  // Start checking from column F (index 5)
+          if (dateRow[i].trim() === formattedToday) {
+            todayIndex = i;
+            break;
+          }
+        }
+
+        if (todayIndex === -1) {
+          alert("Today's date not found in the sheet.");
+          return;
+        }
+
         // Step 1: Remove rows from row 18 down where "Actual" is not in column A
         const filteredRows = [];
         for (let i = 0; i < lines.length; i++) {
@@ -35,8 +56,8 @@
           }
         }
 
-        // Step 2: Remove columns from column F to column JS (index 5 to 308)
-        const cleanedRows = filteredRows.map(row => row.slice(0, 5).concat(row.slice(309)));
+        // Step 2: Remove columns from column F (index 5) to the column containing today's date
+        const cleanedRows = filteredRows.map(row => row.slice(0, 5).concat(row.slice(todayIndex)));
 
         // Convert back to CSV format
         const cleanedCSV = cleanedRows.map(row => row.join(",")).join("\n");
