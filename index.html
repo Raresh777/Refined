@@ -6,48 +6,44 @@
   <title>Leads Summary</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #1f1f1f;
-      color: #f0f0f0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #ffffff;
+      color: #002c6b;
       text-align: center;
       padding: 40px;
+      font-size: 18px;
     }
 
     h1 {
-      color: #ff6600;
+      color: #002c6b;
       margin-bottom: 30px;
       font-size: 42px;
     }
 
     input[type="file"], input[type="date"], button {
-      color: #f0f0f0;
-      background-color: #333;
-      border: 1px solid #ff6600;
-      padding: 10px;
-      border-radius: 5px;
+      color: #ffffff;
+      background-color: #002c6b;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
       margin: 10px;
       font-size: 18px;
-    }
-
-    button {
-      cursor: pointer;
-      border: 2px solid #ff6600;
-      background-color: #ff6600;
-      color: #1f1f1f;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     button:hover {
-      background-color: #e65c00;
+      background-color: #0047ab;
     }
 
     #results {
       margin-top: 30px;
       padding: 20px;
-      background-color: #2a2a2a;
-      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
       width: 80%;
       display: inline-block;
       text-align: left;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
     }
 
     .result-section {
@@ -66,31 +62,6 @@
     #buttons-container {
       display: flex;
       justify-content: center;
-    }
-
-    /* Progress bar for total leads */
-    .progress-bar {
-      height: 30px;
-      width: 100%;
-      background-color: #ddd;
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 10px 0;
-    }
-
-    .progress {
-      height: 100%;
-      background-color: #ff6600;
-      border-radius: 10px;
-      transition: width 0.5s;
-    }
-
-    .below-target {
-      background-color: red;
-    }
-
-    .above-target {
-      background-color: green;
     }
 
     /* Chart container */
@@ -123,11 +94,6 @@
 
     <div class="result-section">
       <h3>Total Leads: <span id="totalLeads"></span></h3>
-      <!-- Progress bar -->
-      <div class="progress-bar">
-        <div class="progress" id="leadProgress"></div>
-      </div>
-      <h3>Target Leads: <span id="targetLeads"></span></h3>
     </div>
 
     <div class="result-section">
@@ -174,33 +140,9 @@
             language: fields[languageIdx]?.split(',')[0]?.trim() // Get first language only
           };
         });
-
-        console.log("Leads Data Parsed:", leadsData); // Debugging output
       };
       
       reader.readAsText(file);
-    }
-
-    // Function to get target leads based on date ranges
-    function getTargetLeads(date) {
-      const targetLeadsData = [
-        { start: "9/16/2024", end: "10/13/2024", target: 213 },
-        { start: "10/14/2024", end: "10/17/2024", target: 221 },
-        { start: "10/18/2024", end: "10/20/2024", target: 274 },
-        { start: "10/21/2024", end: "11/10/2024", target: 274 },
-        { start: "11/11/2024", end: "11/17/2024", target: 145 },
-        { start: "11/18/2024", end: "12/04/2024", target: 92 }
-      ];
-
-      const target = targetLeadsData.find(range => {
-        const targetStartDate = new Date(range.start);
-        const targetEndDate = new Date(range.end);
-        const selectedDate = new Date(date);
-
-        return selectedDate >= targetStartDate && selectedDate <= targetEndDate;
-      });
-
-      return target ? target.target : null; // Return null if there's no target
     }
 
     function processLeads() {
@@ -220,19 +162,6 @@
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
       const totalLeadsCount = leadsForSelectedDate.length;
 
-      // Get target leads and display progress bar
-      const targetLeads = getTargetLeads(formattedDate);
-      document.getElementById('targetLeads').textContent = targetLeads || 'No target';
-      const leadProgress = document.getElementById('leadProgress');
-      const progressPercent = totalLeadsCount / (targetLeads || totalLeadsCount) * 100;
-      leadProgress.style.width = progressPercent + '%';
-      leadProgress.classList.remove('below-target', 'above-target');
-      if (totalLeadsCount < targetLeads) {
-        leadProgress.classList.add('below-target');
-      } else {
-        leadProgress.classList.add('above-target');
-      }
-
       document.getElementById('totalLeads').textContent = totalLeadsCount;
 
       // Process leads by location
@@ -248,7 +177,7 @@
         cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
 
-         // Update location chart
+          // Update location chart
       const locationLabels = Object.keys(locationCount);
       const locationData = Object.values(locationCount);
 
