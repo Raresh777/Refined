@@ -6,47 +6,91 @@
   <title>Leads Summary</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      padding: 20px;
+      font-family: 'Orbitron', sans-serif; /* Futuristic font */
+      background-color: #121212; /* Dark background */
+      color: #00FFCC; /* Neon green text */
       text-align: center;
+      padding: 40px;
     }
     
     h1 {
-      color: #333;
+      color: #00FFFF; /* Bright blue title */
+      text-shadow: 0 0 10px #00FFFF, 0 0 20px #00FFFF;
+      margin-bottom: 30px;
+      font-size: 42px;
     }
     
-    input[type="file"], select, button {
+    label, select, button, input[type="file"] {
+      color: #00FFCC;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid #00FFFF;
       padding: 10px;
-      margin: 10px;
-      font-size: 16px;
+      border-radius: 10px;
+      margin: 15px;
+      font-size: 18px;
+      text-shadow: 0 0 5px #00FFFF;
+      transition: 0.3s ease;
+    }
+    
+    input[type="file"] {
+      cursor: pointer;
+    }
+    
+    button {
+      cursor: pointer;
+      border: 2px solid #00FFFF;
+      box-shadow: 0 0 10px #00FFFF;
+    }
+
+    button:hover {
+      background-color: #00FFFF;
+      color: #121212;
+      box-shadow: 0 0 20px #00FFFF, 0 0 30px #00FFFF;
     }
     
     #results {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #fff;
-      border-radius: 8px;
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #222222;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #00FFFF;
       display: inline-block;
       text-align: left;
+      width: 80%;
     }
     
     .result-section {
       margin-bottom: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 
   <h1>Leads Summary by Date</h1>
+
+  <!-- File upload input -->
   <input type="file" id="csvFileInput" accept=".csv" /><br>
+
+  <!-- Date Selector -->
   <label for="dateSelector">Select Date:</label>
-  <select id="dateSelector"></select><br>
+  <select id="dateSelector" style="max-width: 200px;"></select><br>
+
+  <!-- Show Summary Button -->
   <button onclick="processLeads()">Show Leads Summary</button>
 
+  <!-- Results Section -->
   <div id="results" style="display:none;">
     <h2>Results for <span id="selectedDate"></span></h2>
-    
+
     <div class="result-section">
       <h3>Total Leads: <span id="totalLeads"></span></h3>
     </div>
