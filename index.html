@@ -135,13 +135,15 @@
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: new Date(fields[dateIdx]?.trim()).toISOString().split('T')[0], // Convert date to YYYY-MM-DD
+            date: new Date(fields[dateIdx]?.trim()).toLocaleDateString('en-US'), // Keep the date in M/D/YYYY format
             email: fields[emailIdx]?.trim(),
             phone: fields[phoneIdx]?.trim(),
             location: fields[locationIdx]?.trim(),
             language: fields[languageIdx]?.split(',')[0]?.trim() // Get first language only
           };
         });
+
+        console.log("Leads Data Parsed:", leadsData); // Debugging output
       };
       
       reader.readAsText(file);
@@ -150,16 +152,21 @@
     // Function to get target leads based on date ranges
     function getTargetLeads(date) {
       const targetLeadsData = [
-        { start: "2024-09-16", end: "2024-10-13", target: 213 },
-        { start: "2024-10-14", end: "2024-10-17", target: 221 },
-        { start: "2024-10-18", end: "2024-10-20", target: 274 },
-        { start: "2024-10-21", end: "2024-11-10", target: 274 },
-        { start: "2024-11-11", end: "2024-11-17", target: 145 },
-        { start: "2024-11-18", end: "2024-12-04", target: 92 }
+        { start: "9/16/2024", end: "10/13/2024", target: 213 },
+        { start: "10/14/2024", end: "10/17/2024", target: 221 },
+        { start: "10/18/2024", end: "10/20/2024", target: 274 },
+        { start: "10/21/2024", end: "11/10/2024", target: 274 },
+        { start: "11/11/2024", end: "11/17/2024", target: 145 },
+        { start: "11/18/2024", end: "12/04/2024", target: 92 }
       ];
 
       const target = targetLeadsData.find(range => {
-        return date >= range.start && date <= range.end;
+        // Compare dates in M/D/YYYY format
+        const targetStartDate = new Date(range.start);
+        const targetEndDate = new Date(range.end);
+        const selectedDate = new Date(date);
+
+        return selectedDate >= targetStartDate && selectedDate <= targetEndDate;
       });
 
       return target ? target.target : null; // Return null if there's no target
@@ -175,8 +182,8 @@
         return;
       }
 
-      // Format the date from YYYY-MM-DD
-      const formattedDate = new Date(selectedDate).toISOString().split('T')[0];
+      // Keep the date in M/D/YYYY format
+      const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
 
       // Filter leads by selected date (including all occurrences of that date)
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
@@ -235,8 +242,7 @@
         cityItem.innerHTML = `<strong>${city}</strong>:`;
         const languageList = document.createElement('ul');
 
-        for (const [language, count] of Object.entries(languages)) {
-         
+             for (const [language, count] of Object.entries(languages)) {
           const languageItem = document.createElement('li');
           languageItem.textContent = `${language}: ${count}`;
           languageList.appendChild(languageItem);
@@ -256,3 +262,4 @@
 
 </body>
 </html>
+
