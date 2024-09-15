@@ -6,19 +6,52 @@
   <title>CSV Cleaner</title>
   <style>
     body {
-      background-color: #FFC0CB; /* Pink background */
-      font-family: Arial, sans-serif;
+      background-color: #800080; /* Purple background */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
       padding: 20px;
+    }
+
+    h1 {
+      color: white;
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    input[type="file"] {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    #processButton {
+      background-color: rgba(255, 255, 255, 0.2); /* Transparent button */
+      border: 2px solid white;
+      color: white;
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    #processButton:hover {
+      background-color: rgba(255, 255, 255, 0.5); /* Hover effect */
+      color: black;
+    }
+
+    input, button {
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
 
-  <h1>Upload CSV and Clean Data</h1>
+  <h1>Upload and Clean Your CSV</h1>
   <input type="file" id="csvFileInput" accept=".csv" />
-  <button onclick="processCSV()">Process CSV</button>
-  <button id="downloadButton" style="display:none;">Download Cleaned CSV</button>
+  <br>
+  <button id="processButton" onclick="processCSV()">Process and Download</button>
 
   <script>
     function processCSV() {
@@ -35,7 +68,7 @@
         const csv = e.target.result;
         const lines = csv.split("\n").map(line => line.split(","));  // Parse CSV into 2D array
 
-        // Get today's date in the correct format (assuming the format in the CSV is similar to 'DD/MM/YYYY')
+        // Get today's date in the correct format
         const today = new Date();
         const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Remove time component
 
@@ -48,10 +81,10 @@
           const dateParts = dateRow[i].split("/");  // Assuming dates are in 'DD/MM/YYYY' format
           const dateInCSV = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);  // Convert to date object
 
-          if (dateInCSV <= todayDate) {
-            todayIndex = i;  // This will keep updating till we find today's date or the last earlier date
+          if (dateInCSV < todayDate) {
+            todayIndex = i;  // Find up to today's date
           } else {
-            break;  // Stop when we hit a date later than today
+            break;  // Stop when we hit today's date or beyond
           }
         }
 
@@ -74,12 +107,8 @@
         // Convert back to CSV format
         const cleanedCSV = cleanedRows.map(row => row.join(",")).join("\n");
 
-        // Make the download button visible and set up the download functionality
-        const downloadButton = document.getElementById('downloadButton');
-        downloadButton.style.display = "block";
-        downloadButton.onclick = function() {
-          downloadCSV(cleanedCSV, "cleaned_data.csv");
-        };
+        // Automatically trigger CSV download
+        downloadCSV(cleanedCSV, "cleaned_data.csv");
       };
 
       reader.readAsText(file);
