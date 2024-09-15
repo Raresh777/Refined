@@ -72,9 +72,8 @@
         const today = new Date();
         const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Remove time component
 
-        // Find the index of the column with a date in row 7 (which is index 6 in JavaScript array)
+        // Find the index of the column with today's date in row 7 (index 6 in JavaScript)
         const dateRow = lines[6];  // row 7 corresponds to index 6 in the array
-        const leadsRow = lines[7];  // row 8 corresponds to index 7 for leads
         let todayIndex = -1;
 
         // Parse row 7 (date row) and compare with today's date
@@ -82,10 +81,9 @@
           const dateParts = dateRow[i].split("/");  // Assuming dates are in 'DD/MM/YYYY' format
           const dateInCSV = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);  // Convert to date object
 
-          if (dateInCSV <= todayDate) {
-            todayIndex = i;  // Track the last column that matches today's date
-          } else {
-            break;  // Stop when we hit a future date
+          if (dateInCSV.getTime() === todayDate.getTime()) {
+            todayIndex = i;  // Found today's date column
+            break;  // Stop after finding the correct column
           }
         }
 
@@ -102,11 +100,11 @@
           }
         }
 
-        // Step 2: Remove columns from column F (index 5) to the column containing today's date (todayIndex)
+        // Step 2: Remove all columns from column F onwards, except the column with today's date (todayIndex)
         const cleanedRows = filteredRows.map(row => {
           const leadingColumns = row.slice(0, 5);  // Keep columns A-E
-          const dateSpecificData = row.slice(5, todayIndex + 1);  // Keep data from column F up to today's date
-          return leadingColumns.concat(dateSpecificData);
+          const todayColumn = [row[todayIndex]];  // Keep only the column with today's date
+          return leadingColumns.concat(todayColumn);  // Combine leading columns with today's column
         });
 
         // Convert back to CSV format
