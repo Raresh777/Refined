@@ -4,63 +4,76 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Leads Summary</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js for the charts -->
   <style>
     body {
       font-family: 'Arial', sans-serif;
-      background-color: rgba(0, 0, 0, 0.95);
+      background-color: #1f1f1f;
       color: #f0f0f0;
       text-align: center;
       padding: 40px;
-      background: linear-gradient(130deg, rgba(20,20,50,1) 0%, rgba(40,40,80,1) 100%);
     }
-
+    
     h1 {
-      color: #00FFB2;
+      color: #ff6600;
       margin-bottom: 30px;
       font-size: 42px;
-      text-shadow: 0 0 10px #00FFB2;
     }
-
+    
     input[type="file"], input[type="date"], button {
-      color: #fff;
+      color: #f0f0f0;
       background-color: #333;
-      border: none;
+      border: 1px solid #ff6600;
       padding: 10px;
       border-radius: 5px;
       margin: 10px;
       font-size: 18px;
+    }
+    
+    button {
       cursor: pointer;
+      border: 2px solid #ff6600;
+      background-color: #ff6600;
+      color: #1f1f1f;
     }
 
     button:hover {
-      background-color: #555;
+      background-color: #e65c00;
     }
-
+    
     #results {
       margin-top: 30px;
       padding: 20px;
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: #2a2a2a;
       border-radius: 10px;
       width: 80%;
-      margin: auto;
+      display: inline-block;
       text-align: left;
-      box-shadow: 0 0 15px rgba(0, 255, 195, 0.6);
+    }
+    
+    .result-section {
+      margin-bottom: 20px;
     }
 
-    canvas {
-      max-width: 100%;
-      margin-top: 20px;
+    ul {
+      list-style: none;
+      padding-left: 0;
     }
 
-    .result-text {
-      font-size: 20px;
-      font-weight: bold;
+    li {
+      font-size: 18px;
     }
 
     #buttons-container {
       display: flex;
       justify-content: center;
+    }
+
+    .below-target {
+      color: red;
+    }
+
+    .above-target {
+      color: green;
     }
   </style>
 </head>
@@ -68,58 +81,39 @@
 
   <h1>Leads Summary by Date</h1>
 
+  <!-- File upload input and calendar date picker -->
   <div id="buttons-container">
     <input type="file" id="csvFileInput" accept=".csv" />
     <input type="date" id="datePicker">
   </div>
 
+  <!-- Show Summary Button -->
   <div id="buttons-container">
     <button onclick="processLeads()">Show Leads Summary</button>
   </div>
 
+  <!-- Results Section -->
   <div id="results" style="display:none;">
     <h2>Results for <span id="selectedDate"></span></h2>
-    <p class="result-text" id="totalLeads"></p>
-    <canvas id="cityChart"></canvas> 
-    <canvas id="languageChart"></canvas> 
+
+    <div class="result-section">
+      <h3>Total Leads: <span id="totalLeads"></span></h3>
+      <h3>Target Leads: <span id="targetLeads"></span></h3>
+    </div>
+
+    <div class="result-section">
+      <h3>Leads by Location</h3>
+      <ul id="locationBreakdown"></ul>
+    </div>
+
+    <div class="result-section">
+      <h3>Leads by First Language per City</h3>
+      <ul id="cityLanguageBreakdown"></ul>
+    </div>
   </div>
+
   <script>
     let leadsData = [];
-    let cityChartInstance = null;
-    let languageChartInstance = null;
-
-    function getTargetLeads(date) {
-      const startDate1 = new Date("2024-09-16");
-      const endDate1 = new Date("2024-10-13");
-      const startDate2 = new Date("2024-10-14");
-      const endDate2 = new Date("2024-10-17");
-      const startDate3 = new Date("2024-10-18");
-      const endDate3 = new Date("2024-10-20");
-      const startDate4 = new Date("2024-10-21");
-      const endDate4 = new Date("2024-11-10");
-      const startDate5 = new Date("2024-11-11");
-      const endDate5 = new Date("2024-11-17");
-      const startDate6 = new Date("2024-11-18");
-      const endDate6 = new Date("2024-12-04");
-
-      const currentDate = new Date(date);
-
-      if (currentDate >= startDate1 && currentDate <= endDate1) {
-        return 213;
-      } else if (currentDate >= startDate2 && currentDate <= endDate2) {
-        return 221;
-      } else if (currentDate >= startDate3 && currentDate <= endDate3) {
-        return 274;
-      } else if (currentDate >= startDate4 && currentDate <= endDate4) {
-        return 274;
-      } else if (currentDate >= startDate5 && currentDate <= endDate5) {
-        return 145;
-      } else if (currentDate >= startDate6 && currentDate <= endDate6) {
-        return 92;
-      } else {
-        return "No target";
-      }
-    }
 
     function loadCSV(event) {
       const file = event.target.files[0];
@@ -127,28 +121,51 @@
       
       reader.onload = function (e) {
         const text = e.target.result;
-        const lines = text.split('\\n');
+        const lines = text.split('\n');
         const headers = lines[0].split(',');
 
+        // Indices for the columns we need
         const dateIdx = headers.indexOf('Submission date');
         const emailIdx = headers.indexOf('Email');
         const phoneIdx = headers.indexOf('Phone Number');
         const locationIdx = headers.indexOf('Location');
         const languageIdx = headers.indexOf('Languages');
 
+        // Extract leads data
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: fields[dateIdx]?.trim(),
+            date: new Date(fields[dateIdx]?.trim()).toISOString().split('T')[0], // Convert date to ISO format
             email: fields[emailIdx]?.trim(),
             phone: fields[phoneIdx]?.trim(),
             location: fields[locationIdx]?.trim(),
-            language: fields[languageIdx]?.split(',')[0]?.trim()
+            language: fields[languageIdx]?.split(',')[0]?.trim() // Get first language only
           };
         });
+
+        // Debug: Check how dates are being parsed
+        console.log("Parsed Dates from CSV:", leadsData.map(lead => lead.date));
       };
       
       reader.readAsText(file);
+    }
+
+    // Function to get target leads based on date ranges
+    function getTargetLeads(date) {
+      const targetLeadsData = [
+        { start: "2024-09-16", end: "2024-10-13", target: 213 },
+        { start: "2024-10-14", end: "2024-10-17", target: 221 },
+        { start: "2024-10-18", end: "2024-10-20", target: 274 },
+        { start: "2024-10-21", end: "2024-11-10", target: 274 },
+        { start: "2024-11-11", end: "2024-11-17", target: 145 },
+        { start: "2024-11-18", end: "2024-12-04", target: 92 }
+      ];
+
+      const target = targetLeadsData.find(range => {
+        return date >= range.start && date <= range.end;
+      });
+
+      return target ? target.target : "No target";
     }
 
     function processLeads() {
@@ -161,22 +178,36 @@
         return;
       }
 
-      const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
+      // Convert the selected date to ISO format
+      const formattedDate = new Date(selectedDate).toISOString().split('T')[0];
 
+      // Debug: Check selected date format
+      console.log("Selected Date:", formattedDate);
+
+      // Filter leads by selected date (in ISO format)
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
 
+      // Debug: Check filtered leads
+      console.log("Filtered Leads:", leadsForSelectedDate);
+
+      const actualLeadsCount = leadsForSelectedDate.length;
       const targetLeads = getTargetLeads(formattedDate);
 
-      const totalLeads = leadsForSelectedDate.length;
-      const totalLeadsText = document.getElementById('totalLeads');
+      // Display actual leads and target leads
+      document.getElementById('targetLeads').textContent = targetLeads;
 
-      if (totalLeads < targetLeads) {
-        totalLeadsText.style.color = 'red';
-        totalLeadsText.innerText = `Actual Leads: ${totalLeads} (Target: ${targetLeads}) - Below Target`;
+      const totalLeadsElem = document.getElementById('totalLeads');
+      totalLeadsElem.textContent = actualLeadsCount;
+
+      if (actualLeadsCount < targetLeads) {
+        totalLeadsElem.classList.add('below-target');
+        totalLeadsElem.classList.remove('above-target');
       } else {
-        totalLeadsText.style.color = 'green';
-        totalLeadsText.innerText = `Actual Leads: ${totalLeads} (Target: ${targetLeads}) - Met or Exceeded Target`;
+        totalLeadsElem.classList.add('above-target');
+        totalLeadsElem.classList.remove('below-target');
       }
+
+      // Count leads by location
       const locationCount = {};
       const cityLanguageCount = {};
 
@@ -189,72 +220,36 @@
         cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
 
-      renderCityChart(locationCount, cityLanguageCount);
+      const locationBreakdown = document.getElementById('locationBreakdown');
+      locationBreakdown.innerHTML = '';
+      for (const [location, count] of Object.entries(locationCount)) {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${location}: ${count}`;
+        locationBreakdown.appendChild(listItem);
+      }
+
+      const cityLanguageBreakdown = document.getElementById('cityLanguageBreakdown');
+      cityLanguageBreakdown.innerHTML = '';
+      for (const [city, languages] of Object.entries(cityLanguageCount)) {
+        const cityItem = document.createElement('li');
+        cityItem.innerHTML = `<strong>${city}</strong>:`;
+        const languageList = document.createElement('ul');
+
+        for (const [language, count] of Object.entries(languages)) {
+          const languageItem = document.createElement('li');
+          languageItem.textContent = `${language}: ${count}`;
+          languageList.appendChild(languageItem);
+        }
+
+        cityItem.appendChild(languageList);
+        cityLanguageBreakdown.appendChild(cityItem);
+      }
+
       resultsDiv.style.display = 'block';
-    }
-
-    function renderCityChart(locationCount, cityLanguageCount) {
-      const ctxCity = document.getElementById('cityChart').getContext('2d');
-      
-      if (cityChartInstance) {
-        cityChartInstance.destroy();
-      }
-
-      cityChartInstance = new Chart(ctxCity, {
-        type: 'bar',
-        data: {
-          labels: Object.keys(locationCount),
-          datasets: [{
-            label: 'Leads by City',
-            data: Object.values(locationCount),
-            backgroundColor: '#FFB500'
-          }]
-        },
-        options: {
-          onClick: function(evt, item) {
-            if (item.length > 0) {
-              const city = item[0].element.$context.raw.label;
-              renderLanguageChart(city, cityLanguageCount[city]);
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
-    }
-
-    function renderLanguageChart(city, languageData) {
-      const ctxLanguage = document.getElementById('languageChart').getContext('2d');
-
-      if (languageChartInstance) {
-        languageChartInstance.destroy();
-      }
-
-      languageChartInstance = new Chart(ctxLanguage, {
-        type: 'bar',
-        data: {
-          labels: Object.keys(languageData),
-          datasets: [{
-            label: `Languages in ${city}`,
-            data: Object.values(languageData),
-            backgroundColor: '#FFB500'
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
     }
 
     document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 
-</body &#8203;:contentReference[oaicite:0]{index=0}&#8203;
+</body>
 </html>
