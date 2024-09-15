@@ -63,37 +63,26 @@
       justify-content: center;
     }
 
-    /* Chart container */
-    .chart-container {
-      width: 100%;
-      margin: 30px 0;
-    }
-
-    canvas {
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.2);
+    .small-chart {
+      max-width: 500px;
+      margin: 0 auto;
     }
   </style>
-  <!-- Include Chart.js for graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
   <h1>Leads Summary by Date</h1>
 
-  <!-- File upload input and calendar date picker -->
   <div id="buttons-container">
     <input type="file" id="csvFileInput" accept=".csv" />
     <input type="date" id="datePicker">
   </div>
 
-  <!-- Show Summary Button -->
   <div id="buttons-container">
     <button onclick="processLeads()">Show Leads Summary</button>
   </div>
 
-  <!-- Results Section -->
   <div id="results" style="display:none;">
     <h2>Results for <span id="selectedDate"></span></h2>
 
@@ -103,15 +92,17 @@
 
     <div class="result-section">
       <h3>Leads by Location</h3>
-      <canvas id="locationChart"></canvas>
+      <div class="small-chart">
+        <canvas id="locationChart"></canvas>
+      </div>
     </div>
 
     <div class="result-section">
       <h3>Leads by First Language per City</h3>
-      <canvas id="languageChart"></canvas>
+      <div class="small-chart">
+        <canvas id="languageChart"></canvas>
+      </div>
     </div>
-  </div>
-
   <script>
     let leadsData = [];
 
@@ -138,7 +129,7 @@
           return {
             date: new Date(fields[dateIdx]?.trim()).toLocaleDateString('en-US'), // Keep the date in M/D/YYYY format
             location: fields[locationIdx]?.trim(),
-            language: fields[languageIdx]?.split(',')[0]?.trim() // Get only the first language and remove any extra spaces
+            language: fields[languageIdx]?.split(',')[0]?.trim().replace(/["']/g, "").trim() // Remove quotes and trim spaces
           };
         });
 
@@ -158,14 +149,11 @@
         return;
       }
 
-      // Format the date in M/D/YYYY format
       const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
 
-      // Filter leads by selected date
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
       const totalLeadsCount = leadsForSelectedDate.length;
 
-      // Update total leads display
       document.getElementById('totalLeads').textContent = totalLeadsCount;
 
       // Process leads by location and language per city
@@ -173,29 +161,22 @@
       const cityLanguageCount = {};
 
       leadsForSelectedDate.forEach(lead => {
-        // Count leads by location
         locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
 
-        // Count first languages by city, avoid duplicates
         if (!cityLanguageCount[lead.location]) {
           cityLanguageCount[lead.location] = {};
         }
         if (!cityLanguageCount[lead.location][lead.language]) {
-          cityLanguageCount[lead.location][lead.language] = 0; // Initialize count if not present
+          cityLanguageCount[lead.location][lead.language] = 0;
         }
-        cityLanguageCount[lead.location][lead.language] += 1; // Increment count
+        cityLanguageCount[lead.location][lead.language] += 1;
       });
 
-      // Update location chart
       updateLocationChart(locationCount);
-
-      // Update language chart per city
       updateLanguageChart(cityLanguageCount);
 
-      // Finally, display the results section
       resultsDiv.style.display = 'block';
     }
-
     function updateLocationChart(locationCount) {
       const locationLabels = Object.keys(locationCount);
       const locationData = Object.values(locationCount);
@@ -215,7 +196,7 @@
             backgroundColor: '#00FF00',
             hoverBackgroundColor: '#00AA00',
             borderWidth: 1,
-            barThickness: 50,
+            barThickness: 30,
           }]
         },
         options: {
@@ -254,7 +235,6 @@
 
       Object.entries(cityLanguageCount).forEach(([city, languages]) => {
         Object.entries(languages).forEach(([language, count]) => {
-          // Add only city and language without hyphen or extra characters
           cityLanguageLabels.push(`${city} (${language})`);
           cityLanguageData.push(count);
         });
@@ -285,7 +265,7 @@
               display: false,
             }
           },
-                    scales: {
+          scales: {
             x: {
               grid: {
                 display: false,
@@ -311,10 +291,7 @@
       });
     }
 
-    // Attach file reader to file input change event
     document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
-
 </body>
 </html>
-
