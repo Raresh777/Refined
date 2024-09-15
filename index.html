@@ -98,7 +98,7 @@
 
     <div class="result-section">
       <h3>Total Leads: <span id="totalLeads"></span></h3>
-      <h3 id="targetLeadsSection" style="display:none;">Target Leads: <span id="targetLeads"></span></h3> <!-- Display only if there's a target -->
+      <h3>Target Leads: <span id="targetLeads"></span></h3> <!-- Display the target leads here -->
     </div>
 
     <div class="result-section">
@@ -124,8 +124,6 @@
         const lines = text.split('\n');
         const headers = lines[0].split(',');
 
-        console.log("Headers:", headers);  // Debug: Check headers
-
         // Indices for the columns we need
         const dateIdx = headers.indexOf('Submission date');
         const emailIdx = headers.indexOf('Email');
@@ -137,15 +135,13 @@
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: new Date(fields[dateIdx]?.trim()).toLocaleDateString('en-US'), // Format date to MM/DD/YYYY
+            date: fields[dateIdx]?.trim(), // Clean up date
             email: fields[emailIdx]?.trim(),
             phone: fields[phoneIdx]?.trim(),
             location: fields[locationIdx]?.trim(),
             language: fields[languageIdx]?.split(',')[0]?.trim() // Get first language only
           };
         });
-
-        console.log("Parsed Leads Data:", leadsData); // Debug: Check parsed data
       };
       
       reader.readAsText(file);
@@ -154,12 +150,12 @@
     // Function to get target leads based on date ranges
     function getTargetLeads(date) {
       const targetLeadsData = [
-        { start: "09/16/2024", end: "10/13/2024", target: 213 },
-        { start: "10/14/2024", end: "10/17/2024", target: 221 },
-        { start: "10/18/2024", end: "10/20/2024", target: 274 },
-        { start: "10/21/2024", end: "11/10/2024", target: 274 },
-        { start: "11/11/2024", end: "11/17/2024", target: 145 },
-        { start: "11/18/2024", end: "12/04/2024", target: 92 }
+        { start: "2024-09-16", end: "2024-10-13", target: 213 },
+        { start: "2024-10-14", end: "2024-10-17", target: 221 },
+        { start: "2024-10-18", end: "2024-10-20", target: 274 },
+        { start: "2024-10-21", end: "2024-11-10", target: 274 },
+        { start: "2024-11-11", end: "2024-11-17", target: 145 },
+        { start: "2024-11-18", end: "2024-12-04", target: 92 }
       ];
 
       const target = targetLeadsData.find(range => {
@@ -179,27 +175,24 @@
         return;
       }
 
-      // Format selected date to MM/DD/YYYY
+      // Format the date from YYYY-MM-DD to M/D/YYYY
       const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
 
-      console.log("Selected Date (formatted):", formattedDate); // Debug: Check selected date
-
+      // Filter leads by selected date (including all occurrences of that date)
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
-      console.log("Filtered Leads for Selected Date:", leadsForSelectedDate); // Debug: Check leads for selected date
 
-      const actualLeadsCount = leadsForSelectedDate.length;
+      // Count total leads (based on how many times the date appears)
+      const totalLeadsCount = leadsForSelectedDate.length;
+      document.getElementById('totalLeads').textContent = totalLeadsCount;
+
+      // Get the target leads for the selected date
       const targetLeads = getTargetLeads(formattedDate);
-
-      // Display actual leads and target leads
-      const totalLeadsElem = document.getElementById('totalLeads');
-      totalLeadsElem.textContent = actualLeadsCount;
-
       if (targetLeads !== null) {
-        document.getElementById('targetLeadsSection').style.display = 'block';
         document.getElementById('targetLeads').textContent = targetLeads;
 
-        // Color the total leads red if below target, green if at/above target
-        if (actualLeadsCount < targetLeads) {
+        // Change the color of the total leads based on whether it's below or above target
+        const totalLeadsElem = document.getElementById('totalLeads');
+        if (totalLeadsCount < targetLeads) {
           totalLeadsElem.classList.add('below-target');
           totalLeadsElem.classList.remove('above-target');
         } else {
@@ -207,32 +200,36 @@
           totalLeadsElem.classList.remove('below-target');
         }
       } else {
-        document.getElementById('targetLeadsSection').style.display = 'none';
+        document.getElementById('targetLeads').textContent = 'No target';
       }
 
       // Count leads by location
       const locationCount = {};
-      const cityLanguageCount = {};
+      const cityLanguageCount = {}; // To track languages per city
 
       leadsForSelectedDate.forEach(lead => {
+        // Count locations
         locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
 
+        // Count languages per city
         if (!cityLanguageCount[lead.location]) {
           cityLanguageCount[lead.location] = {};
         }
         cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
 
+      // Display breakdown by location
       const locationBreakdown = document.getElementById('locationBreakdown');
-      locationBreakdown.innerHTML = '';
+      locationBreakdown.innerHTML = ''; // Clear previous results
       for (const [location, count] of Object.entries(locationCount)) {
         const listItem = document.createElement('li');
         listItem.textContent = `${location}: ${count}`;
         locationBreakdown.appendChild(listItem);
       }
 
+      // Display languages per city
       const cityLanguageBreakdown = document.getElementById('cityLanguageBreakdown');
-            cityLanguageBreakdown.innerHTML = '';
+      cityLanguageBreakdown.innerHTML = ''; // Clear previous results
       for (const [city, languages] of Object.entries(cityLanguageCount)) {
         const cityItem = document.createElement('li');
         cityItem.innerHTML = `<strong>${city}</strong>:`;
@@ -248,11 +245,14 @@
         cityLanguageBreakdown.appendChild(cityItem);
       }
 
-      resultsDiv.style.display = 'block'; // Show results section after processing
+      // Finally, show the results section after processing everything
+      resultsDiv.style.display = 'block';
     }
 
+    // Attach the file reader to the file input change event
     document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 
 </body>
 </html>
+
