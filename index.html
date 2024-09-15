@@ -3,127 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSV Cleaner</title>
+  <title>Leads Summary</title>
   <style>
     body {
-      background-color: #0000FF; /* Blue background */
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
       padding: 20px;
+      text-align: center;
     }
-
+    
     h1 {
-      color: white;
-      font-size: 36px;
+      color: #333;
+    }
+    
+    input[type="file"], select, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    
+    #results {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 8px;
+      display: inline-block;
+      text-align: left;
+    }
+    
+    .result-section {
       margin-bottom: 20px;
-    }
-
-    input[type="file"] {
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: white;
-    }
-
-    #processButton {
-      background-color: rgba(255, 255, 255, 0.2); /* Transparent button */
-      border: 2px solid white;
-      color: white;
-      padding: 10px 20px;
-      font-size: 18px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(5px);
-    }
-
-    #processButton:hover {
-      background-color: rgba(255, 255, 255, 0.5); /* Hover effect */
-      color: black;
-    }
-
-    input, button {
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
 
-  <h1>Upload and Clean Your CSV</h1>
-  <input type="file" id="csvFileInput" accept=".csv" />
-  <br>
-  <button id="processButton" onclick="processCSV()">Process and Download</button>
+  <h1>Leads Summary by Date</h1>
+  <input type="file" id="csvFileInput" accept=".csv" /><br>
+  <label for="dateSelector">Select Date:</label>
+  <select id="dateSelector"></select><br>
+  <button onclick="processLeads()">Show Leads Summary</button>
+
+  <div id="results" style="display:none;">
+    <h2>Results for <span id="selectedDate"></span></h2>
+    
+    <div class="result-section">
+      <h3>Total Leads: <span id="totalLeads"></span></h3>
+    </div>
+
+    <div class="result-section">
+      <h3>Leads by Location</h3>
+      <ul id="locationBreakdown"></ul>
+    </div>
+
+    <div class="result-section">
+      <h3>Leads by First Language</h3>
+      <ul id="languageBreakdown"></ul>
+    </div>
+  </div>
 
   <script>
-    function processCSV() {
-      const fileInput = document.getElementById('csvFileInput');
-      const file = fileInput.files[0];
+    let leadsData = [];
+    let dateOptions = new Set();
 
-      if (!file) {
-        alert("Please upload a CSV file.");
-        return;
-      }
-
+    function loadCSV(event) {
+      const file = event.target.files[0];
       const reader = new FileReader();
+      
       reader.onload = function (e) {
-        const csv = e.target.result;
-        const lines = csv.split("\n").map(line => line.split(","));  // Parse CSV into 2D array
+        const text = e.target.result;
+        const lines = text.split('\n');
+        const headers = lines[0].split(',');
 
-        // Get today's date in the correct format
-        const today = new Date();
-        const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Remove time component
+        // Indices for the columns we need
+        const dateIdx = headers.indexOf('Submission date');
+        const emailIdx = headers.indexOf('Email');
+        const phoneIdx = headers.indexOf('Phone Number');
+        const locationIdx = headers.indexOf('Location');
+        const languageIdx = headers.indexOf('Languages');
 
-        // Find the index of the column with today's date in row 7 (index 6 in JavaScript)
-        const dateRow = lines[6];  // row 7 corresponds to index 6 in the array
-        let todayIndex = -1;
-
-        // Parse row 7 (date row) and compare with today's date
-        for (let i = 5; i < dateRow.length; i++) {  // Start checking from column F (index 5)
-          const dateParts = dateRow[i].split("/");  // Assuming dates are in 'DD/MM/YYYY' format
-          const dateInCSV = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);  // Convert to date object
-
-          if (dateInCSV.getTime() === todayDate.getTime()) {
-            todayIndex = i;  // Found today's date column
-            break;  // Stop after finding the correct column
-          }
-        }
-
-        if (todayIndex === -1) {
-          alert("No matching date found in the sheet.");
-          return;
-        }
-
-        // Step 1: Remove rows from row 18 down where "Actual" is not in column A
-        const filteredRows = [];
-        for (let i = 0; i < lines.length; i++) {
-          if (i < 17 || lines[i][0].includes("Actual")) {
-            filteredRows.push(lines[i]);
-          }
-        }
-
-        // Step 2: Remove all columns from column F onwards, except the column with today's date (todayIndex)
-        const cleanedRows = filteredRows.map(row => {
-          const leadingColumns = row.slice(0, 5);  // Keep columns A-E
-          const todayColumn = [row[todayIndex]];  // Keep only the column with today's date
-          return leadingColumns.concat(todayColumn);  // Combine leading columns with today's column
+        leadsData = lines.slice(1).map(line => {
+          const fields = line.split(',');
+          return {
+            date: fields[dateIdx],
+            email: fields[emailIdx],
+            phone: fields[phoneIdx],
+            location: fields[locationIdx],
+            language: fields[languageIdx].split(',')[0] // Extract first language
+          };
         });
 
-        // Convert back to CSV format
-        const cleanedCSV = cleanedRows.map(row => row.join(",")).join("\n");
-
-        // Automatically trigger CSV download
-        downloadCSV(cleanedCSV, "cleaned_data.csv");
+        // Populate date selector with unique dates
+        leadsData.forEach(lead => dateOptions.add(lead.date));
+        populateDateSelector();
       };
-
+      
       reader.readAsText(file);
     }
 
-    function downloadCSV(content, fileName) {
-      const blob = new Blob([content], { type: "text/csv" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      link.click();
+    function populateDateSelector() {
+      const dateSelector = document.getElementById('dateSelector');
+      dateSelector.innerHTML = ''; // Clear the options
+
+      dateOptions.forEach(date => {
+        const option = document.createElement('option');
+        option.value = date;
+        option.text = date;
+        dateSelector.appendChild(option);
+      });
     }
+
+    function processLeads() {
+      const selectedDate = document.getElementById('dateSelector').value;
+      const resultsDiv = document.getElementById('results');
+      document.getElementById('selectedDate').textContent = selectedDate;
+
+      // Filter leads by selected date and ensure uniqueness using email or phone number
+      const leadsForSelectedDate = leadsData.filter(
+        (lead, index, self) => 
+          lead.date === selectedDate &&
+          index === self.findIndex(l => l.email === lead.email || l.phone === lead.phone)
+      );
+
+      // Count total leads
+      document.getElementById('totalLeads').textContent = leadsForSelectedDate.length;
+
+      // Count leads by location
+      const locationCount = {};
+      leadsForSelectedDate.forEach(lead => {
+        locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
+      });
+
+      const locationBreakdown = document.getElementById('locationBreakdown');
+      locationBreakdown.innerHTML = ''; // Clear previous results
+      for (const [location, count] of Object.entries(locationCount)) {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${location}: ${count}`;
+        locationBreakdown.appendChild(listItem);
+      }
+
+      // Count leads by first language
+      const languageCount = {};
+      leadsForSelectedDate.forEach(lead => {
+        languageCount[lead.language] = (languageCount[lead.language] || 0) + 1;
+      });
+
+      const languageBreakdown = document.getElementById('languageBreakdown');
+      languageBreakdown.innerHTML = ''; // Clear previous results
+      for (const [language, count] of Object.entries(languageCount)) {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${language}: ${count}`;
+        languageBreakdown.appendChild(listItem);
+      }
+
+      resultsDiv.style.display = 'block';
+    }
+
+    document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 
 </body>
