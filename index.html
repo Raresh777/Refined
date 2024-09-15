@@ -7,7 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'Orbitron', sans-serif;
       background-color: rgba(0, 0, 0, 0.85);
       color: #f0f0f0;
       text-align: center;
@@ -132,7 +132,7 @@
       
       reader.onload = function (e) {
         const text = e.target.result;
-        const lines = text.split('\n');
+        const lines = text.split('\\n');
         const headers = lines[0].split(',');
 
         // Indices for the columns we need
@@ -172,7 +172,6 @@
 
       // Filter leads by selected date (including all occurrences of that date)
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
-
       // Calculate target leads
       const targetLeads = getTargetLeads(formattedDate);
 
@@ -200,6 +199,7 @@
         }
         cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
+
       // Render bar chart for city and breakdown for languages by city
       renderCityChart(locationCount, cityLanguageCount);
       resultsDiv.style.display = 'block';
@@ -250,8 +250,9 @@
         data: {
           labels: Object.keys(languageData),
           datasets: [{
+            label: &#8203;:contentReference[oaicite:0]{index=0}&#8203;
             label: `Languages in ${city}`,
-             data: Object.values(languageData),
+            data: Object.values(languageData),
             backgroundColor: '#00FFC3'
           }]
         },
