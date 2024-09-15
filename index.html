@@ -98,7 +98,6 @@
   <!-- Results Section -->
   <div id="results" style="display:none;">
     <h2>Results for <span id="selectedDate"></span></h2>
-
     <div class="result-section">
       <h3>Total Leads: <span id="totalLeads"></span></h3>
     </div>
@@ -117,9 +116,7 @@
   <script>
     let leadsData = [];
 
-    // Chart instances
-    let locationChart, languageChart;
-
+    // Function to handle the CSV upload and parse the data
     function loadCSV(event) {
       const file = event.target.files[0];
       const reader = new FileReader();
@@ -147,11 +144,13 @@
             language: fields[languageIdx]?.split(',')[0]?.trim() // Get first language only
           };
         });
+
+        console.log("Leads Data Parsed:", leadsData); // Debugging output
       };
       
       reader.readAsText(file);
     }
-
+    // Function to process and display leads data
     function processLeads() {
       const selectedDate = document.getElementById('datePicker').value;
       const resultsDiv = document.getElementById('results');
@@ -162,102 +161,59 @@
         return;
       }
 
-      // Keep the date in M/D/YYYY format
+      // Format the date in M/D/YYYY format
       const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
 
       // Filter leads by selected date
       const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
       const totalLeadsCount = leadsForSelectedDate.length;
 
+      // Update total leads display
       document.getElementById('totalLeads').textContent = totalLeadsCount;
 
-      // Process leads by location
+      // Process leads by location and language per city
       const locationCount = {};
       const cityLanguageCount = {};
 
       leadsForSelectedDate.forEach(lead => {
+        // Count leads by location
         locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
 
+        // Count languages by city
         if (!cityLanguageCount[lead.location]) {
           cityLanguageCount[lead.location] = {};
         }
         cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
 
-            // Update location chart (using radar chart for a futuristic look)
+      // Prepare chart data
+      updateCharts(locationCount, cityLanguageCount);
+
+      // Show the results section
+      resultsDiv.style.display = 'block';
+    }
+    // Function to update charts based on processed data
+    function updateCharts(locationCount, cityLanguageCount) {
+      // Destroy existing charts if they exist
+      if (locationChart) locationChart.destroy();
+      if (languageChart) languageChart.destroy();
+
+      // Create the 3D bar chart for "Leads by Location"
       const locationLabels = Object.keys(locationCount);
       const locationData = Object.values(locationCount);
 
-      if (locationChart) {
-        locationChart.destroy();
-      }
-
       const ctx1 = document.getElementById('locationChart').getContext('2d');
       locationChart = new Chart(ctx1, {
-        type: 'radar',
+        type: 'bar',
         data: {
           labels: locationLabels,
           datasets: [{
             label: 'Leads by Location',
             data: locationData,
-            backgroundColor: 'rgba(0, 255, 0, 0.2)',
-            borderColor: '#00FF00',
-            pointBackgroundColor: '#00FF00',
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            r: {
-              grid: {
-                color: '#00FF00'
-              },
-              angleLines: {
-                color: '#00FF00'
-              },
-              pointLabels: {
-                color: '#00FF00'
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                color: '#00FF00'
-              }
-            }
-          }
-        }
-      });
-
-      // Update language chart (using line chart for smooth trend)
-      const cityLanguageLabels = [];
-      const cityLanguageData = [];
-
-      Object.entries(cityLanguageCount).forEach(([city, languages]) => {
-        Object.entries(languages).forEach(([language, count]) => {
-          cityLanguageLabels.push(`${city} - ${language}`);
-          cityLanguageData.push(count);
-        });
-      });
-
-      if (languageChart) {
-        languageChart.destroy();
-      }
-
-      const ctx2 = document.getElementById('languageChart').getContext('2d');
-      languageChart = new Chart(ctx2, {
-        type: 'line',
-        data: {
-          labels: cityLanguageLabels,
-          datasets: [{
-            label: 'Leads by Language per City',
-            data: cityLanguageData,
-            backgroundColor: 'rgba(0, 255, 0, 0.1)',
-            borderColor: '#00FF00',
-            pointBackgroundColor: '#00FF00',
-            tension: 0.4, // Smooth lines
+            backgroundColor: '#00FF00',
+            hoverBackgroundColor: '#00AA00',
+            borderWidth: 1,
+            barThickness: 50,
           }]
         },
         options: {
@@ -269,15 +225,19 @@
           },
           scales: {
             x: {
+              grid: {
+                display: false,
+              },
               ticks: {
                 color: '#00FF00'
               }
             },
             y: {
-              ticks: {
-                color: '#00FF00'
-              },
+              beginAtZero: true,
               grid: {
+                color: '#00FF00',
+              },
+              ticks: {
                 color: '#00FF00'
               }
             }
@@ -285,14 +245,66 @@
         }
       });
 
-      // Finally, display the results section
-      resultsDiv.style.display = 'block';
-    }
+      // Create horizontal bar chart for "Leads by First Language per City"
+      const cityLanguageLabels = [];
+      const cityLanguageData = [];
 
-    // Attach file reader to file input change event
+      Object.entries(cityLanguageCount).forEach(([city, languages]) => {
+        Object.entries(languages).forEach(([language, count]) => {
+          cityLanguageLabels.push(`${city} (${language})`);
+          cityLanguageData.push(count);
+        });
+      });
+
+      const ctx2 = document.getElementById('languageChart').getContext('2d');
+      languageChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: cityLanguageLabels,
+          datasets: [{
+            label: 'Leads by Language per City',
+            data: cityLanguageData,
+            backgroundColor: '#00FF00',
+            hoverBackgroundColor: '#00AA00',
+            borderWidth: 1,
+            barThickness: 30,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false,
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: {
+                color: '#00FF00',
+              },
+              ticks: {
+                color: '#00FF00'
+              }
+            },
+            y: {
+              grid: {
+                display: false,
+              },
+              ticks: {
+                color: '#00FF00'
+              }
+            }
+          }
+        }
+      });
+    }
+  </script>
+    // Attach the file reader to the file input change event
     document.getElementById('csvFileInput').addEventListener('change', loadCSV);
+
   </script>
 
 </body>
 </html>
-
