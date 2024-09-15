@@ -63,6 +63,7 @@
       justify-content: center;
     }
 
+    /* Chart container */
     .chart-container {
       width: 100%;
       margin: 30px 0;
@@ -128,8 +129,6 @@
 
         // Indices for the columns we need
         const dateIdx = headers.indexOf('Submission date');
-        const emailIdx = headers.indexOf('Email');
-        const phoneIdx = headers.indexOf('Phone Number');
         const locationIdx = headers.indexOf('Location');
         const languageIdx = headers.indexOf('Languages');
 
@@ -138,10 +137,8 @@
           const fields = line.split(',');
           return {
             date: new Date(fields[dateIdx]?.trim()).toLocaleDateString('en-US'), // Keep the date in M/D/YYYY format
-            email: fields[emailIdx]?.trim(),
-            phone: fields[phoneIdx]?.trim(),
             location: fields[locationIdx]?.trim(),
-            language: fields[languageIdx]?.split(',')[0]?.trim() // Get first language only
+            language: fields[languageIdx]?.split(',')[0]?.trim() // Get only the first language and remove any extra spaces
           };
         });
 
@@ -179,11 +176,14 @@
         // Count leads by location
         locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
 
-        // Count languages by city
+        // Count first languages by city, avoid duplicates
         if (!cityLanguageCount[lead.location]) {
           cityLanguageCount[lead.location] = {};
         }
-        cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
+        if (!cityLanguageCount[lead.location][lead.language]) {
+          cityLanguageCount[lead.location][lead.language] = 0; // Initialize count if not present
+        }
+        cityLanguageCount[lead.location][lead.language] += 1; // Increment count
       });
 
       // Update location chart
@@ -254,6 +254,7 @@
 
       Object.entries(cityLanguageCount).forEach(([city, languages]) => {
         Object.entries(languages).forEach(([language, count]) => {
+          // Add only city and language without hyphen or extra characters
           cityLanguageLabels.push(`${city} (${language})`);
           cityLanguageData.push(count);
         });
@@ -284,19 +285,22 @@
               display: false,
             }
           },
-          scales: {
+                    scales: {
             x: {
-              beginAtZero: true,
               grid: {
-                color: '#00FF00',
+                display: false,
               },
               ticks: {
-                color: '#00FF00'
+                color: '#00FF00',
+                autoSkip: false,
+                maxRotation: 45,
+                minRotation: 45
               }
             },
             y: {
+              beginAtZero: true,
               grid: {
-                display: false,
+                color: '#00FF00',
               },
               ticks: {
                 color: '#00FF00'
@@ -313,3 +317,4 @@
 
 </body>
 </html>
+
