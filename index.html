@@ -133,8 +133,9 @@
     </div>
   </div>
 
-  <!-- Right side table for data summary -->
+  <!-- Right side tables for data summary -->
   <div id="summary">
+    <!-- Table for Leads by Location -->
     <h3>Lead Summary</h3>
     <table id="summaryTable">
       <thead>
@@ -145,6 +146,20 @@
       </thead>
       <tbody>
         <!-- Summary rows will be populated here -->
+      </tbody>
+    </table>
+
+    <!-- NEW Table for Leads by First Language per City -->
+    <h3>Leads by First Language per City</h3>
+    <table id="languageSummaryTable">
+      <thead>
+        <tr>
+          <th>City (Language)</th>
+          <th>Leads</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Language summary rows will be populated here -->
       </tbody>
     </table>
   </div>
@@ -190,7 +205,9 @@
       const endDateValue = document.getElementById('endDatePicker').value;
       const resultsDiv = document.getElementById('results');
       const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
+      const languageSummaryTable = document.getElementById('languageSummaryTable').getElementsByTagName('tbody')[0];
       summaryTable.innerHTML = ''; // Clear previous results
+      languageSummaryTable.innerHTML = ''; // Clear previous language results
       document.getElementById('startDate').textContent = startDateValue;
       document.getElementById('endDate').textContent = endDateValue;
 
@@ -233,7 +250,7 @@
         cityLanguageCount[lead.location][lead.language] += 1;
       });
 
-      // Populate the summary table
+      // Populate the summary table for locations
       for (let location in locationCount) {
         const row = summaryTable.insertRow();
         const cell1 = row.insertCell(0);
@@ -242,10 +259,22 @@
         cell2.textContent = locationCount[location];
       }
 
+      // Populate the summary table for languages per city
+      for (let city in cityLanguageCount) {
+        for (let language in cityLanguageCount[city]) {
+          const row = languageSummaryTable.insertRow();
+          const cell1 = row.insertCell(0);
+          const cell2 = row.insertCell(1);
+          cell1.textContent = `${city} (${language})
+`;
+          cell2.textContent = cityLanguageCount[city][language];
+        }
+      }
+
       updateLocationChart(locationCount);
       updateLanguageChart(cityLanguageCount);
 
-      resultsDiv.style.display = 'block';
+      resultsDiv.style.display = 'block'; // Show the results section
     }
 
     function updateLocationChart(locationCount) {
@@ -262,27 +291,27 @@
         data: {
           labels: locationLabels,
           datasets: [{
-                        label: 'Leads by Location',
+            label: 'Leads by Location',
             data: locationData,
-            backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green with some transparency
+            backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green with transparency
             hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter tropical green
-            borderColor: 'rgba(0, 255, 0, 1)', // Tropical green for borders
+            borderColor: 'rgba(0, 255, 0, 1)', // Green for borders
             borderWidth: 2,
             barThickness: 50,
-            borderRadius: 10, // 3D-like effect with rounded corners
+            borderRadius: 10, // 3D-like rounded effect
           }]
         },
         options: {
           responsive: true,
           plugins: {
             legend: {
-              display: false,
+              display: false
             }
           },
           scales: {
             x: {
               grid: {
-                display: false,
+                display: false
               },
               ticks: {
                 color: '#00FF00'
@@ -291,14 +320,13 @@
             y: {
               beginAtZero: true,
               grid: {
-                color: 'rgba(0, 255, 0, 0.3)', // Light green grid lines
+                color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
               },
               ticks: {
                 color: '#00FF00'
               }
             }
-          },
-          backgroundColor: 'rgba(0, 0, 0, 0.7)', // Transparent black background for the chart
+          }
         }
       });
     }
@@ -328,23 +356,23 @@
             data: cityLanguageData,
             backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green bars
             hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter on hover
-            borderColor: 'rgba(0, 255, 0, 1)', // Border color
+            borderColor: 'rgba(0, 255, 0, 1)', // Green borders
             borderWidth: 2,
             barThickness: 50,
-            borderRadius: 10, // Rounded corners for a 3D effect
+            borderRadius: 10 // Rounded 3D effect
           }]
         },
         options: {
           responsive: true,
           plugins: {
             legend: {
-              display: false,
+              display: false
             }
           },
           scales: {
             x: {
               grid: {
-                display: false,
+                display: false
               },
               ticks: {
                 color: '#00FF00',
@@ -356,14 +384,13 @@
             y: {
               beginAtZero: true,
               grid: {
-                color: 'rgba(0, 255, 0, 0.3)', // Light green grid lines
+                color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
               },
               ticks: {
                 color: '#00FF00'
               }
             }
-          },
-          backgroundColor: 'rgba(0, 0, 0, 0.7)', // Transparent black background for the chart
+          }
         }
       });
     }
