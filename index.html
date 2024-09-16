@@ -71,12 +71,12 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-  <h1>Leads Summary by Date</h1>
+  <h1>Leads Summary by Date Range</h1>
 
   <div id="buttons-container">
     <input type="file" id="csvFileInput" accept=".csv" />
-    <input type="date" id="datePicker">
+    <input type="date" id="startDatePicker">
+    <input type="date" id="endDatePicker">
   </div>
 
   <div id="buttons-container">
@@ -84,7 +84,7 @@
   </div>
 
   <div id="results" style="display:none;">
-    <h2>Results for <span id="selectedDate"></span></h2>
+    <h2>Results from <span id="startDate"></span> to <span id="endDate"></span></h2>
 
     <div class="result-section">
       <h3>Total Leads: <span id="totalLeads"></span></h3>
@@ -127,7 +127,7 @@
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: new Date(fields[dateIdx]?.trim()).toLocaleDateString('en-US'), // Keep the date in M/D/YYYY format
+            date: new Date(fields[dateIdx]?.trim()), // Keep the date as a Date object
             location: fields[locationIdx]?.trim(),
             language: fields[languageIdx]?.split(',')[0]?.trim().replace(/["']/g, "").trim() // Remove quotes and trim spaces
           };
@@ -138,21 +138,33 @@
       
       reader.readAsText(file);
     }
-
     function processLeads() {
-      const selectedDate = document.getElementById('datePicker').value;
+      const startDateValue = document.getElementById('startDatePicker').value;
+      const endDateValue = document.getElementById('endDatePicker').value;
       const resultsDiv = document.getElementById('results');
-      document.getElementById('selectedDate').textContent = selectedDate;
+      document.getElementById('startDate').textContent = startDateValue;
+      document.getElementById('endDate').textContent = endDateValue;
 
-      if (!selectedDate) {
-        alert('Please select a date.');
+      if (!startDateValue || !endDateValue) {
+        alert('Please select a start and end date.');
         return;
       }
 
-      const formattedDate = new Date(selectedDate).toLocaleDateString('en-US');
+      const startDate = new Date(startDateValue);
+      const endDate = new Date(endDateValue);
 
-      const leadsForSelectedDate = leadsData.filter(lead => lead.date === formattedDate);
-      const totalLeadsCount = leadsForSelectedDate.length;
+      // Normalize the dates by setting the time to 00:00:00
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999); // Include the entire end date day
+
+      // Filter the leads for the selected date range
+      const leadsForSelectedRange = leadsData.filter(lead => {
+        const leadDate = new Date(lead.date);
+        leadDate.setHours(0, 0, 0, 0); // Normalize lead date as well
+        return leadDate >= startDate && leadDate <= endDate;
+      });
+
+      const totalLeadsCount = leadsForSelectedRange.length;
 
       document.getElementById('totalLeads').textContent = totalLeadsCount;
 
@@ -160,7 +172,7 @@
       const locationCount = {};
       const cityLanguageCount = {};
 
-      leadsForSelectedDate.forEach(lead => {
+      leadsForSelectedRange.forEach(lead => {
         locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
 
         if (!cityLanguageCount[lead.location]) {
