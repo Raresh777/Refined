@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leads Summary</title>
+  <title>DARE Leads Summary</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: rgba(0, 0, 0, 0.7);
+      font-family: 'Montserrat', sans-serif;
+      background-color: #1c1c1c;
       color: #00FF00;
       padding: 40px;
       font-size: 18px;
@@ -16,10 +18,47 @@
       justify-content: space-between;
     }
 
-    h1 {
-      color: #00FF00;
+    .header {
+      text-align: center;
       margin-bottom: 30px;
+      position: relative;
+    }
+
+    .header-title {
       font-size: 42px;
+      color: #FFD700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin: 10px 0;
+      position: relative;
+    }
+
+    .header-title::before,
+    .header-title::after {
+      content: '';
+      display: block;
+      height: 3px;
+      background: #FFD700;
+      width: 120%;
+      position: absolute;
+      left: -10%;
+    }
+
+    .header-title::before {
+      top: -10px;
+    }
+
+    .header-title::after {
+      bottom: -10px;
+    }
+
+    .section {
+      background: rgba(28, 28, 28, 0.7);
+      border: 1px solid #FFD700;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
     }
 
     input[type="file"], input[type="date"], button {
@@ -97,7 +136,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div>
+  <div class="header">
+    <div class="header-title">DARE Leads Summary</div>
+  </div>
+
+  <div class="section">
     <h1>Leads Summary by Date Range</h1>
 
     <div id="buttons-container">
@@ -134,7 +177,7 @@
   </div>
 
   <!-- Right side tables for data summary -->
-  <div id="summary">
+  <div id="summary" class="section">
     <!-- Table for Leads by Location -->
     <h3>Lead Summary</h3>
     <table id="summaryTable">
@@ -238,7 +281,7 @@
       const locationCount = {};
       const cityLanguageCount = {};
 
-      leadsForSelectedRange.forEach(lead => {
+       leadsForSelectedRange.forEach(lead => {
         locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
 
         if (!cityLanguageCount[lead.location]) {
@@ -265,8 +308,7 @@
           const row = languageSummaryTable.insertRow();
           const cell1 = row.insertCell(0);
           const cell2 = row.insertCell(1);
-          cell1.textContent = `${city} (${language})
-`;
+          cell1.textContent = `${city} (${language})`;
           cell2.textContent = cityLanguageCount[city][language];
         }
       }
@@ -330,72 +372,6 @@
         }
       });
     }
-
-    function updateLanguageChart(cityLanguageCount) {
-      const cityLanguageLabels = [];
-      const cityLanguageData = [];
-
-      Object.entries(cityLanguageCount).forEach(([city, languages]) => {
-        Object.entries(languages).forEach(([language, count]) => {
-          cityLanguageLabels.push(`${city} (${language})`);
-          cityLanguageData.push(count);
-        });
-      });
-
-      if (languageChart) {
-        languageChart.destroy();
-      }
-
-      const ctx2 = document.getElementById('languageChart').getContext('2d');
-      languageChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: cityLanguageLabels,
-          datasets: [{
-            label: 'Leads by Language per City',
-            data: cityLanguageData,
-            backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green bars
-            hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter on hover
-            borderColor: 'rgba(0, 255, 0, 1)', // Green borders
-            borderWidth: 2,
-            barThickness: 50,
-            borderRadius: 10 // Rounded 3D effect
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            x: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: '#00FF00',
-                autoSkip: false,
-                maxRotation: 45,
-                minRotation: 45
-              }
-            },
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
-              },
-              ticks: {
-                color: '#00FF00'
-              }
-            }
-          }
-        }
-      });
-    }
-
-    document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 </body>
 </html>
